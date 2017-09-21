@@ -1,0 +1,4 @@
+node_modules
+bower_dependancies
+.tmp
+react-native-game-center/node_modules
