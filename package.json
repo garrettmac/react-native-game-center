@@ -1,6 +1,6 @@
 {
   "name": "react-native-game-center",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Apple's Game Center integration with React Native",
   "main": "RNGameCenter/index.js",
   "directories": {
