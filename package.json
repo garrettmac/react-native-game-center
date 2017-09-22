@@ -1,0 +1,34 @@
+{
+  "name": "react-native-game-center",
+  "version": "1.0.0",
+  "description": "Apple's Game Center integration with React Native",
+  "main": "RNGameCenter/index.js",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/garrettmac/react-native-game-center.git"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "react-native-component",
+    "game-center",
+    "game",
+    "center",
+    "native-module",
+    "ios",
+    "apple",
+    "gamecenter"
+  ],
+  "author": "garrettmac <garrett@vyga.io> (http://vyga.io)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/garrettmac/react-native-game-center/issues"
+  },
+  "homepage": "https://github.com/garrettmac/react-native-game-center#readme"
+}
