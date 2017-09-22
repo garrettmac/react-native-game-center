@@ -27,7 +27,7 @@ RNGameCenter.init(leaderboardIdentifier).then((o)=>{
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 const {width, height} = Dimensions.get('window');
 
-let leaderboardIdentifier="StockShotLeaderboard"
+let leaderboardIdentifier="high_scores"
 
 
 export default class GameCenterExample extends Component {

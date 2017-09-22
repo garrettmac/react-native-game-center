@@ -33,3 +33,13 @@ New App
 <img alt="achivements5" src="snapshots/achivements5.png"/>
 <img alt="final" src="snapshots/final.png"/>
 </p>
+
+
+### In Xcode
+
+
+
+<p align="center">
+<img alt="xcode" src="snapshots/xcode.png"/>
+<img alt="xcode1" src="snapshots/xcode1.png"/>
+</p>
