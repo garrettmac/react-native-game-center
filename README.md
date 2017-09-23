@@ -43,11 +43,30 @@ RNGameCenter.init().then(player=>console.log("player: ",player))
 ```
 
 
-|Methods| Params | Description|
-|----|----|
-| authenticateLocalPlayer | | authenticateLocalPlayer |
-| init | | init |
-| updateAchievements | | updateAchievements |
-| resetAchievements | | resetAchievements |
-| showLeaderboard | | showLeaderboard |
-| reportScore | | reportScore |
+## User
+
+getUser | {displayName,playerID,alias,image}
+
+## Achievements
+
+| Method            | Required Parameters | Optional Parameters                         | Success Return Value                                                          | Fail Return Value            |
+|-------------------|---------------------|---------------------------------------------|-------------------------------------------------------------------------------|------------------------------|
+| showAchievements  | none                | achievementIdentifier                       | Successfully opened achievements                                              | Error opening achievements   |
+| getAchievements   | none                | none                                        | {identifier,percentComplete,completed,lastReportedDate,showsCompletionBanner} | Error getting achievements   |
+| resetAchievements | none                | none                                        | Reset achievements                                                            | Error resetting achievements |
+| submitAchievement | percentComplete     | achievementIdentifier,showsCompletionBanner | Successfully submitted score                                                  | Error submitting score       |
+
+
+
+
+
+## Leaderboard
+
+| Method            | Required Parameters | Optional Parameters                         | Success Return Value                                                          | Fail Return Value            |
+|-------------------|---------------------|---------------------------------------------|-------------------------------------------------------------------------------|------------------------------|
+| showLeaderboard   | none                | leaderboardIdentifier                       | Successfully opened leaderboard                                              | Error opening leaderboard   |
+| getLeaderboardPlayers   | playerIds (array of player ids)                | none                       | array of players                                              | Error creating Leaderboard query / Error getting players leaderboards   |
+| getLeaderboard   | none                | none                                        | | Error getting leaderboard   |
+| resetLeaderboard | none                | none                                        | Reset leaderboard                                                            | Error resetting leaderboard |
+| submitLeaderboardScore | score     | leaderboardIdentifier | Successfully submitted score                                                  | Error submitting score       |
+You can now import Markdown table code directly using File/Paste table data... dialog.

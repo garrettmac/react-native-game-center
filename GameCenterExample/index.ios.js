@@ -13,11 +13,17 @@ import {
   Text,
   View
 } from 'react-native';
-const RNGameCenter=NativeModules.RNGameCenter
+
+// const { RNGameCenter  } = NativeModules;
+import RNGameCenter from './RNGameCenter';
+let leaderboardIdentifier="high_scores"
+// let achievementIdentifier="pro_award"
+let achievementIdentifier="novice_award"
+// console.log(Object.getOwnPropertyNames(RNGameCenter).filter(function (p) {return typeof RNGameCenter[p] === 'function';}));
 // const RNGameCenter=NativeModules.ReactNativeGameCenter
 
 try{
-RNGameCenter.init(leaderboardIdentifier).then((o)=>{
+RNGameCenter.init({leaderboardIdentifier}).then((o)=>{
   console.log("init: ",o)
 }).catch((e)=>{console.warn("e",e)})
 // RNGameCenter.initPlayer2()
@@ -27,19 +33,22 @@ RNGameCenter.init(leaderboardIdentifier).then((o)=>{
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
 const {width, height} = Dimensions.get('window');
 
-let leaderboardIdentifier="high_scores"
+
 
 
 export default class GameCenterExample extends Component {
   constructor(props){
   	super(props);
-  	this.state = {score:0};
-    this.reportScore=this.reportScore.bind(this)
+  	this.state = {score:5};
+
     this.showAchievements=this.showAchievements.bind(this)
     this.showLeaderboard=this.showLeaderboard.bind(this)
     this.getAchievements=this.getAchievements.bind(this)
+    this.getPlayer=this.getPlayer.bind(this)
     this.updateAchievements=this.updateAchievements.bind(this)
-    this.submitScore=this.submitScore.bind(this)
+    this.getLeaderboardPlayers=this.getLeaderboardPlayers.bind(this)
+    this.challengeWithScore=this.challengeWithScore.bind(this)
+    this.submitLeaderboardScore=this.submitLeaderboardScore.bind(this)
     this.resetAchievements=this.resetAchievements.bind(this)
     this.incrementScore=this.incrementScore.bind(this)
     this.decrementScore=this.decrementScore.bind(this)
@@ -47,7 +56,7 @@ export default class GameCenterExample extends Component {
 componentDidMount() {
 
   try{
-  RNGameCenter.init(leaderboardIdentifier).then((o)=>{
+  RNGameCenter.init({leaderboardIdentifier}).then((o)=>{
     console.log("init: ",o)
   }).catch((e)=>{console.warn("e",e)})
   // RNGameCenter.initPlayer2()
@@ -61,11 +70,75 @@ this.setState({score:this.state.score+1})
 decrementScore(){
 this.setState({score:this.state.score+1})
 }
+
+getPlayer(){
+  try{
+  RNGameCenter.getPlayer().then((o)=>{
+    console.log("o",o)
+  })
+  .catch((e)=>{
+    console.warn("e",e)
+  })
+  } catch (e) {console.log("ERRORRRR RNGameCenter.getPlayer",e);}
+}
+
+
+showLeaderboard(){
+  try{
+  RNGameCenter.showLeaderboard({leaderboardIdentifier})
+} catch (e) {console.log("ERRORRRR RNGameCenter.showLeaderboard",e);}
+}
+getLeaderboardPlayers(){
+  try{
+
+
+  RNGameCenter.getLeaderboardPlayers({playerIds:[]})
+} catch (e) {console.log("ERRORRRR RNGameCenter.getLeaderboardPlayers",e);}
+}
+submitLeaderboardScore(){
+  try{
+  // RNGameCenter.submitLeaderboardScore({leaderboardIdentifier})
+  RNGameCenter.submitLeaderboardScore({score:this.state.score,leaderboardIdentifier}).then((o)=>{
+    // alert(o)
+    this.showLeaderboard()
+  }).catch((e)=>console.warn("e",e))
+} catch (e) {console.log("ERRORRRR RNGameCenter.showLeaderboard",e);}
+
+}
+
+
+
+challengeWithScore(){
+  try{
+
+  // RNGameCenter.challengeWithScore().then((o)=>{
+  // RNGameCenter.findScoresOfFriendsToChallenge({score:this.state.score,message:"my message",players:["G:8135064222"],achievementIdentifier:"novice_award"}).then((o)=>{
+  RNGameCenter.challengeWithScore({score:this.state.score,message:"my message",players:["G:8135064222"],achievementIdentifier:"novice_award"}).then((o)=>{
+    alert(o)
+
+  }).catch((e)=>console.warn("e",e))
+} catch (e) {console.log("ERRORRRR RNGameCenter.showLeaderboard",e);}
+}
+
+
+
+
+showAchievements(){
+  try{
+  RNGameCenter.showAchievements({achievementIdentifier})
+} catch (e) {console.log("ERRORRRR RNGameCenter.showAchievements",e);}
+}
+getAchievements(){
+  try{
+  RNGameCenter.getAchievements().then((o)=>{
+    console.log("getAchievements",o)
+  }).catch((e)=>{console.warn("getAchievements",e)})
+} catch (e) {console.log("ERRORRRR RNGameCenter.getAchievements",e);}
+}
 updateAchievements(){
   try{
   RNGameCenter.updateAchievements()
-} catch (e) {console.log("ERRORRRR RNGameCenter.updateAchievements",e);}
-
+  } catch (e) {console.log("ERRORRRR RNGameCenter.updateAchievements",e);}
 }
 resetAchievements(){
   try{
@@ -73,50 +146,9 @@ resetAchievements(){
 } catch (e) {console.log("ERRORRRR RNGameCenter.resetAchievements",e);}
 
 }
-showLeaderboard(){
-  try{
-  // RNGameCenter.showLeaderboard({leaderboardIdentifier})
-  RNGameCenter.showLeaderboard(leaderboardIdentifier)
-} catch (e) {console.log("ERRORRRR RNGameCenter.showLeaderboard",e);}
-
-}
-submitScore(){
-  try{
-  // RNGameCenter.submitScore({leaderboardIdentifier})
-  RNGameCenter.submitScore({score:this.state.score,leaderboardIdentifier:"highest_earnings"}).then((o)=>{
-    console.log("o",o)
-  })
-  .catch((e)=>{
-    console.warn("e",e)
-  })
-} catch (e) {console.log("ERRORRRR RNGameCenter.showLeaderboard",e);}
-
-}
-
-showAchievements(){
-  try{
-
-  RNGameCenter.showAchievements(leaderboardIdentifier)
-} catch (e) {console.log("ERRORRRR RNGameCenter.showAchievements",e);}
-}
-getAchievements(){
-  try{
-
-  RNGameCenter.getAchievements().then((o)=>{
-    console.log("getAchievements",o)
-  })
-  .catch((e)=>{
-    console.warn("getAchievements",e)
-  })
-} catch (e) {console.log("ERRORRRR RNGameCenter.getAchievements",e);}
-}
-reportScore(score=this.state.score){
-  try{
-    RNGameCenter.reportScore({score,leaderboardIdentifier})
-} catch (e) {console.log("ERRORRRR RNGameCenter.reportScore",e);}
 
 
-}
+
   render() {
     const {score} =this.state
     return (
@@ -143,36 +175,66 @@ React Native Game Center
           </View>
 
 
-          <TouchableOpacity onPress={this.updateAchievements} style={[s.rowContainer,]}>
-            <Icon name={"content-save"} size={25} color="rgba(0,0,0,0.5)"/>
-            <Text style={[]}>update Achievements </Text>
-          </TouchableOpacity>
 
 
+          <View style={[s.rowTitleContainer,]}>
+              <Text style={[s.titleText]}>player  </Text>
+          </View>
+          <View style={[s.rowContainer,]}>
+            <TouchableOpacity onPress={this.challengeWithScore} style={[s.rowContainer,]}>
+              <Icon name={"share-variant"} size={25} color="rgba(0,0,0,0.5)"/>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={this.getPlayer} style={[s.rowContainer,]}>
+                <Icon name={"information"} size={25} color="rgba(0,0,0,0.5)"/>
+            </TouchableOpacity>
+          </View>
 
-          <TouchableOpacity onPress={this.resetAchievements} style={[s.rowContainer,]}>
-            <Icon name={"delete"} size={25} color="rgba(0,0,0,0.5)"/>
-            <Text style={[]}>reset Achievements </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={this.showLeaderboard} style={[s.rowContainer,]}>
+          <View style={[s.rowTitleContainer,]}>
+              <Text style={[s.titleText]}>Leaderboard  </Text>
+          </View>
+<View style={[s.rowContainer,]}>
+          <TouchableOpacity onPress={this.showLeaderboard} style={[]}>
             <Icon name={"format-list-bulleted"} size={25} color="rgba(0,0,0,0.5)"/>
-            <Text style={[]}>show Leaderboard </Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={this.submitLeaderboardScore} style={[]}>
+          <Icon name={"content-save"} size={25} color="rgba(0,0,0,0.5)"/>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={this.getLeaderboardPlayers} style={[]}>
+          <Icon name={"account-multiple"} size={25} color="rgba(0,0,0,0.5)"/>
           </TouchableOpacity>
 
 
-          <TouchableOpacity onPress={this.reportScore} style={[s.rowContainer,]}>
-            <Icon name={"file-chart"} size={25} color="rgba(0,0,0,0.5)"/>
-            <Text style={[]}>report Score </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.getAchievements} style={[s.rowContainer,]}>
-            <Icon name={"trophy"} size={25} color="rgba(0,0,0,0.5)"/>
-            <Text style={[]}>get Achievements </Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={this.submitScore} style={[s.rowContainer,]}>
-            <Icon name={"circle"} size={25} color="rgba(0,0,0,0.5)"/>
-            <Text style={[]}>submitScore </Text>
-          </TouchableOpacity>
+</View>
+
+<View style={[s.rowTitleContainer,]}>
+    <Text style={[s.titleText]}>Achievements  </Text>
+</View>
+<View style={[s.rowContainer,]}>
+
+
+  <TouchableOpacity onPress={this.showAchievements} style={[s.rowContainer,]}>
+    <Icon name={"format-list-bulleted"} size={25} color="rgba(0,0,0,0.5)"/>
+  </TouchableOpacity>
+  <TouchableOpacity onPress={this.resetAchievements} style={[s.rowContainer,]}>
+    <Icon name={"delete"} size={25} color="rgba(0,0,0,0.5)"/>
+  </TouchableOpacity>
+
+  <TouchableOpacity onPress={this.getAchievements} style={[s.rowContainer,]}>
+    <Icon name={"information"} size={25} color="rgba(0,0,0,0.5)"/>
+  </TouchableOpacity>
+
+
+  <TouchableOpacity onPress={this.updateAchievements} style={[s.rowContainer,]}>
+    <Icon name={"content-save"} size={25} color="rgba(0,0,0,0.5)"/>
+  </TouchableOpacity>
+
+</View>
+
+
+
+
+
 
 
 
@@ -205,6 +267,8 @@ const s = StyleSheet.create({
     textAlign: 'center',
 
   },
+  rowTitleContainer:{flexDirection: 'row',},
+titleText:{fontWeight:"800"},
   instructions: {
     textAlign: 'center',
     color: '#333333',

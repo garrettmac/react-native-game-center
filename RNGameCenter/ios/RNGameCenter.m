@@ -12,9 +12,10 @@
 #import <React/RCTConvert.h>
 #import <React/RCTLog.h>
 
-
+//Global Defaults
 NSString *_leaderboardIdentifier;
-//NSBOOL *_gameCenterEnabled;
+NSString *_achievementIdentifier;
+NSString *_playerId;
 
 
 @interface RNGameCenter ()
@@ -22,45 +23,41 @@ NSString *_leaderboardIdentifier;
 @property (nonatomic, strong) GKGameCenterViewController *gkView;
 @property (nonatomic, strong) UIViewController *reactNativeViewController;
 @property (nonatomic, strong) NSNumber *_currentAdditionCounter;
-//@property (nonatomic, strong) UIAlertController *alertController;
-//@property (nonatomic, strong) UIImagePickerController *picker;
-//@property (nonatomic, strong) RCTResponseSenderBlock callback;
-//@property (nonatomic, strong) NSDictionary *defaultOptions;
-//@property (nonatomic, retain) NSMutableDictionary *options, *response;
-//@property (nonatomic, strong) NSArray *customButtons;
-
 @end
 
-//@property (nonatomic, assign) BOOL _gameCenterEnabled;
+
 @implementation RNGameCenter
-- (dispatch_queue_t)methodQueue
-{
-  return dispatch_get_main_queue();
-}
+
+  - (dispatch_queue_t)methodQueue{
+      return dispatch_get_main_queue();
+  }
 
 
 RCT_EXPORT_MODULE()
 
 
 
-//RCT_EXPORT_METHOD(showLeaderboard: (NSString *)name
-//                  (RCTPromiseResolveBlock)resolve
-//                  rejecter:(RCTPromiseRejectBlock)reject)
+/* -----------------------------------------------------------------------------------------------------------------------------------------
+ Init Game Center
+ -----------------------------------------------------------------------------------------------------------------------------------------*/
 
 
-
-//  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-//  [rnView presentViewController:gcViewController animated:YES completion:nil];
-RCT_EXPORT_METHOD(init:(NSString *)leaderboardIdentifier
-                  //RCT_EXPORT_METHOD(authenticateLocalPlayer: (RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(init:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
-  GKGameCenterViewController* gcViewController = [[GKGameCenterViewController alloc]init];
+  //GKGameCenterViewController* gcViewController = [[GKGameCenterViewController alloc]init];
+  if(options[@"leaderboardIdentifier"])_leaderboardIdentifier=options[@"leaderboardIdentifier"];
+  else reject(@"Error", @"Error please pass your leaderboardIdentifier into init function",nil);
+  
+
+  if(options[@"achievementIdentifier"])_achievementIdentifier=options[@"achievementIdentifier"];
+
+  
   UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-  _leaderboardIdentifier=leaderboardIdentifier;
+  
   GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
   localPlayer.authenticateHandler = ^(UIViewController *gcViewController, NSError *error){
-    if (gcViewController != nil) {
+     if (gcViewController != nil) {
       [rnView presentViewController:gcViewController animated:YES completion:nil];
     }else{
       if ([GKLocalPlayer localPlayer].authenticated) {
@@ -69,81 +66,19 @@ RCT_EXPORT_METHOD(init:(NSString *)leaderboardIdentifier
 
           if (error != nil) {
             NSLog(@"%@",[error localizedDescription]);
-            reject(@"Error", @"Error initiating Player",error);
+            reject(@"Error", @"Error initiating Game Center make sure you are enrolled in the apple program, you set up a game center in itunes connect, and you registed it to the correct and matching app bundle id",error);
           }else{
-            __weak GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
-
+                        //set to global
                         _leaderboardIdentifier=leaderboardIdentifier;
-//            GKLocalPlayer *player = [GKLocalPlayer localPlayer];
-            NSDictionary* user = @{
-                                   @"alias":localPlayer.alias,
-                                   @"displayName":localPlayer.displayName,
-                                   @"playerID":localPlayer.playerID
-                                   };
-//            NSDictionary *json = [RCTConvert NSDictionary:player];
-//            NSLog(@"user json %@", json);
-            RCTLog(@"user json %@", user);
-            resolve(user);
+            resolve(@"init success");
           }
         }];
       }else{
-        /*_gameCenterEnabled=NO;*/
-        reject(@"Error", @"Error initiating Player",error);
+        
+        reject(@"Error", @"Error initiating Game Center Player",error);
       }
     }
-  };//localPlayer.authenticateHandler
-};//RCT_EXPORT_METHOD
-
-
-
-
-RCT_EXPORT_METHOD(showLeaderboard:(NSString *)leaderboardIdentifier
-                resolve:(RCTPromiseResolveBlock)resolve
-//RCT_EXPORT_METHOD(showLeaderboard:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject){
-
-  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-  GKGameCenterViewController *leaderboardController = [[GKGameCenterViewController alloc] init];
-
-  if (leaderboardController != NULL)
-  {
-    leaderboardController.leaderboardIdentifier = leaderboardIdentifier;
-    leaderboardController.viewState = GKGameCenterViewControllerStateLeaderboards;
-    leaderboardController.gameCenterDelegate = self;
-      [rnView presentViewController: leaderboardController animated: YES completion:nil];
-    resolve(@"opened Leaderboard");
-  }
-}
-
-- (void)gameCenterViewControllerDidFinish:(GKGameCenterViewController *)viewController
-{
-   NSLog(@"DISSSMMIIISSSSSEDDDD1");
-  [viewController dismissViewControllerAnimated:YES completion:nil];
-}
-
-- (void)gameCenterViewControllerDidCancel:(GKGameCenterViewController *)gameCenterViewController
-{
-    NSLog(@"DISSSMMIIISSSSSEDDDD3");
-//  dispatch_async(dispatch_get_main_queue(), ^{
-//    [gkView dismissViewControllerAnimated:YES completion:^{
-////      self.callback(@[@{@"didCancel": @YES}]);
-//    }];
-//  });
-}
-
-
-RCT_EXPORT_METHOD(showAchievements: (RCTPromiseResolveBlock)resolve
-rejecter:(RCTPromiseRejectBlock)reject){
-
-
-  GKGameCenterViewController* gcViewController = [[GKGameCenterViewController alloc]init];
-
-  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-  gcViewController.viewState = GKGameCenterViewControllerStateAchievements;
-  gcViewController.leaderboardIdentifier = _leaderboardIdentifier;
-  [rnView presentViewController:gcViewController animated:YES completion:nil];
-  //  }
-  resolve(@"opened");
+  };
 };
 
 
@@ -154,76 +89,297 @@ rejecter:(RCTPromiseRejectBlock)reject){
 
 
 
-RCT_EXPORT_METHOD(reportScore:(NSDictionary *)options
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* -----------------------------------------------------------------------------------------------------------------------------------------
+ Player
+ -----------------------------------------------------------------------------------------------------------------------------------------*/
+
+
+
+
+/* --------------getPlayer--------------*/
+
+RCT_EXPORT_METHOD(getPlayer:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  @try {
+    GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
+      NSDictionary* user = @{
+                             @"alias":localPlayer.alias,
+                             @"displayName":localPlayer.displayName,
+                             @"playerID":localPlayer.playerID,
+                             @"alias":localPlayer.alias
+                             };
+      resolve(user);
+}@catch (NSError * e) {
+    reject(@"Error",@"Error getting user.", e);
+  }
+}
+/* --------------getPlayerImage--------------*/
+//
+
+RCT_EXPORT_METHOD(getPlayerImage:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+   GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
+  
+  
+  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                       NSUserDomainMask, YES);
+  NSString *documentsDirectory = [paths objectAtIndex:0];
+  NSString *path = [documentsDirectory stringByAppendingPathComponent:
+                    @"user.jpg" ];
+  
+  // Check if the user photo is cached
+  BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
+  
+  if(fileExists){
+    // Return it if it does
+    resolve(path);
+    
+  }else{
+    // Else load it from the game center
+    [localPlayer loadPhotoForSize:GKPhotoSizeSmall withCompletionHandler:^(UIImage *photo, NSError *error) {
+      
+      if (photo != nil){
+        NSData* data = UIImageJPEGRepresentation(photo, 0.8);
+        [data writeToFile:path atomically:YES];
+        resolve(path);
+        
+      }
+      if (error != nil)
+      {
+        reject(@"Error", @"Error no user player Image",error);
+      }
+    }];
+  }
+}
+
+
+
+RCT_EXPORT_METHOD(challengePlayers:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+//- (void) challengeViewController:(MyAchievementChallengeViewController*)controller wasDismissedWithChallenge:(BOOL)issued
+  @try {
+    NSArray *challengePlayerArray=options[@"players"];
+    resolve(@"Successfully opened achievements");
+  }
+  @catch (NSError * e) {
+    reject(@"Error",@"Error opening achievements.", e);
+  }
+//
+//  [self dismissViewControllerAnimated:YES completion:NULL];
+//  if (issued)
+//  {
+//
+//  }
+}
+
+
+RCT_EXPORT_METHOD(challengeWithScore:(int64_t)playerScore
+                  options:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+//  -(void) sendScoreChallengeToPlayers:(NSArray*)players withScore:(int64_t)score message:(NSString*)message {
+  NSString *message = options[@"message"];
+  NSArray *players = options[@"players"];
+  NSString *achievementId;
+  if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
+    //1
+    GKScore *gkScore = [[GKScore alloc] initWithLeaderboardIdentifier:achievementId];
+    gkScore.value = playerScore;
+  
+    //2
+   UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+    [gkScore issueChallengeToPlayers:players message:message];
+  GKGameCenterViewController *leaderboardController = [[GKGameCenterViewController alloc] init];
+//    [rnView presentViewController: leaderboardController animated: YES completion:nil];
+  
+  [rnView presentViewController:gkScore animated:YES completion:nil];
+  
+  //challengeComposeControllerWithMessage
+//  }
+
+}
+
+
+//-(void) findScoresOfFriendsToChallenge {
+  RCT_EXPORT_METHOD(findScoresOfFriendsToChallenge:(NSDictionary *)options
+                    resolve:(RCTPromiseResolveBlock)resolve
+                    rejecter:(RCTPromiseRejectBlock)reject){
+    
+    // Get leaderboardIdentifier or use default leaderboardIdentifier
+    NSString *achievementId;
+    if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
+    else achievementId=_achievementIdentifier;
+  GKLeaderboard *leaderboard = [[GKLeaderboard alloc] init];
+  leaderboard.identifier = achievementId;
+  leaderboard.playerScope = GKLeaderboardPlayerScopeFriendsOnly;
+  leaderboard.range = NSMakeRange(1, 100);
+  [leaderboard loadScoresWithCompletionHandler:^(NSArray *scores, NSError *error) {
+    BOOL success = (error == nil);
+    
+    if (success) {
+//      if (!_includeLocalPlayerScore) {
+//        NSMutableArray *friendsScores = [NSMutableArray array];
+//        for (GKScore *score in scores) {
+//          if (![score.playerID isEqualToString:[GKLocalPlayer localPlayer].playerID]) {
+//            [friendsScores addObject:score];
+//          }
+//        }
+//        scores = friendsScores;
+      resolve(scores);
+      
+    }else{
+       reject(@"Error", @"Error scores",error);
+    }
+  }];
+}
+
+
+
+
+/* -----------------------------------------------------------------------------------------------------------------------------------------
+ Leaderboard
+  -----------------------------------------------------------------------------------------------------------------------------------------*/
+
+/* --------------showLeaderboard--------------*/
+//RCT_EXPORT_METHOD(showLeaderboard:(NSString *)leaderboardIdentifier
+RCT_EXPORT_METHOD(showLeaderboard:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  //RCT_EXPORT_METHOD(showLeaderboard:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+
+  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+  GKGameCenterViewController *leaderboardController = [[GKGameCenterViewController alloc] init];
+  NSString *leaderboardId;
+  if(options[@"leaderboardIdentifier"])leaderboardId=options[@"leaderboardIdentifier"];
+  else leaderboardId=_leaderboardIdentifier;
+  if (leaderboardController != NULL){
+    leaderboardController.leaderboardIdentifier = leaderboardId;
+    leaderboardController.viewState = GKGameCenterViewControllerStateLeaderboards;
+    leaderboardController.gameCenterDelegate = self;
+    [rnView presentViewController: leaderboardController animated: YES completion:nil];
+    resolve(@"opened Leaderboard");
+  }
+}
+
+
+/* --------------submitLeaderboardScore--------------*/
+
+
+RCT_EXPORT_METHOD(submitLeaderboardScore:(int64_t)score
+                  options:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
 
-  //GKGameCenterViewController* gcViewController = [[GKLeaderboardViewController alloc]init];
-//  GKScore *gkscore;
-//  if(options[@"leaderboardIdentifier"]){
-//      gkscore = [[GKScore alloc] initWithLeaderboardIdentifier:options[@"leaderboardIdentifier"]];
-//  }else{
-//    gkscore = [[GKScore alloc] initWithLeaderboardIdentifier:_leaderboardIdentifier];
-//  }
-
-  //    int64_t intscore = score;
-//  NSNumber* userScore = [options valueForKey:@"score"];
-//  int score = [userScore intValue];
-
-//
-// int64_t score = options[@"score"];
-//  int scoreInt = options[@"score"];
-//  RCTLog(@"user score %@", score);
-//  RCTLog(@"user scoreInt %@", scoreInt);
-//
-//  GKScore *score = [[GKScore alloc] initWithLeaderboardIdentifier:_leaderboardIdentifier];
-//  score.value = options[@"score"];
-//
-//  [GKScore reportScores:@[score] withCompletionHandler:^(NSError *error) {
-//    if (error != nil) {
-//      NSLog(@"%@", [error localizedDescription]);
-//    }
-//  }];
-  NSNumber *scoreInt4 = options[@"score"];
-  //int64_t scoreInt = options[@"score"];
-  //  NSNumber* userScore = [options valueForKey:@"score"];
-    int scoreInt = [scoreInt4 intValue];
+  // Get leaderboardIdentifier or use default leaderboardIdentifier
   NSString *leaderboardId;
-  if(options[@"leaderboardIdentifier"]){
-    leaderboardId=options[@"leaderboardIdentifier"];
-  }else{
-    leaderboardId=_leaderboardIdentifier;
-  }
+  if(options[@"leaderboardIdentifier"])leaderboardId=options[@"leaderboardIdentifier"];
+  else leaderboardId=_leaderboardIdentifier;
+  
+  
+  GKScore *scoreSubmitter = [[GKScore alloc] initWithLeaderboardIdentifier: leaderboardId];
+  scoreSubmitter.value = score;
+  scoreSubmitter.context = 0;
+  
+  [GKScore reportScores:@[scoreSubmitter] withCompletionHandler:^(NSError *error) {
+    if (error)
+    {
+      reject(@"Error", @"Error submitting score",error);
+    }else{
+      resolve(@"Successfully submitted score");
+    }
+  }];
+}
 
-    GKScore *score = [[GKScore alloc] initWithLeaderboardIdentifier:leaderboardId];
-    score.value = 20;
 
-    [GKScore reportScores:@[score] withCompletionHandler:^(NSError *error) {
-      if (error != nil) {
-        NSLog(@"%@", [error localizedDescription]);
-        reject(@"Error", @"Error reporting Score",error);
-      }else{
-        resolve(@"reported Score");
-      }
+
+/* --------------getLeaderboardPlayers--------------*/
+
+RCT_EXPORT_METHOD(getLeaderboardPlayers:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  //Get Player Ids
+  NSArray *playerIds=options[@"playerIds"];
+  //create Query with Player Ids
+  GKLeaderboard *query = [[GKLeaderboard alloc] initWithPlayers:[NSArray arrayWithObject:playerIds]];
+
+  if (query != nil){
+    [query loadScoresWithCompletionHandler: ^(NSArray *scores, NSError *error) {
+      if (error != nil)reject(@"Error", @"Error getting players leaderboards",error);
+      else  resolve(scores);
     }];
+  }else{
+    reject(@"Error", @"Error creating Leaderboard query",nil);
+  }
+}
 
-};//RCT_EXPORT_METHOD
 
 
 
 
-//- (void) getAchievements:(CDVInvokedUrlCommand*)command;
-//RCT_EXPORT_METHOD(getAchievements:(NSDictionary *)options resolve:(RCTPromiseResolveBlock)resolve
+
+
+
+
+/*
+ -----------------------------------------------------------------------------------------------------------------------------------------
+ Achievements
+  -----------------------------------------------------------------------------------------------------------------------------------------
+ */
+
+/* --------------showAchievements--------------*/
+
+RCT_EXPORT_METHOD(showAchievements: (NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  @try {
+    GKGameCenterViewController* gcViewController = [[GKGameCenterViewController alloc]init];
+    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+    gcViewController.viewState = GKGameCenterViewControllerStateAchievements;
+    // Get achievementIdentifier or use default achievementIdentifier
+    NSString *achievementId;
+    if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
+    else achievementId=_achievementIdentifier;
+    gcViewController.leaderboardIdentifier = achievementId;
+    //attaches to class to allow dismissal
+    gcViewController.gameCenterDelegate = self;
+    [rnView presentViewController:gcViewController animated:YES completion:nil];
+    resolve(@"Successfully opened achievements");
+  }
+  @catch (NSError * e) {
+    reject(@"Error",@"Error opening achievements.", e);
+  }
+};
+
+
+
+/* --------------getAchievements--------------*/
+
   RCT_EXPORT_METHOD(getAchievements: (RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
-//  __block CDVPluginResult* pluginResult = nil;
   NSMutableArray *earntAchievements = [NSMutableArray array];
-
   [GKAchievement loadAchievementsWithCompletionHandler:^(NSArray *achievements, NSError *error)
    {
-     if (error == nil)
-     {
+     if (error == nil){
        for (GKAchievement* achievement in achievements)
        {
          NSMutableDictionary *entry = [NSMutableDictionary dictionary];
@@ -233,13 +389,13 @@ RCT_EXPORT_METHOD(reportScore:(NSDictionary *)options
          entry[@"lastReportedDate"] = [NSNumber numberWithDouble:[achievement.lastReportedDate timeIntervalSince1970] * 1000];
          entry[@"showsCompletionBanner"] = [NSNumber numberWithBool:achievement.showsCompletionBanner];
 //         entry[@"playerID"] = achievement.playerID;
-          NSLog(@"IDDDDD %@", achievement);
          [earntAchievements addObject:entry];
        }
+       
        resolve(earntAchievements);
        //pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray: earntAchievements];
      }else{
-        reject(@"Error", @"Error getting achivements",error);
+        reject(@"Error", @"Error getting achievements",error);
 //       pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR];
      }
 //     [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
@@ -248,118 +404,100 @@ RCT_EXPORT_METHOD(reportScore:(NSDictionary *)options
 
 
 
-
+/* --------------resetAchievements--------------*/
 RCT_EXPORT_METHOD(resetAchievements:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
 
   // Clear all progress saved on Game Center.
-  [GKAchievement resetAchievementsWithCompletionHandler:^(NSError *error)
-   {
-     if (error != nil)
-     {
-           reject(@"Error", @"Error getting achivements",error);
-     } else {
+  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+  
+  UIAlertController * alert = [UIAlertController
+                               alertControllerWithTitle:@"Reset Achievements?"
+                               message:@"Are you sure you want to reset your achievements. This can not be undone."
+                               preferredStyle:UIAlertControllerStyleAlert];
+  
+   UIAlertController *yesAlert = [UIAlertController alertControllerWithTitle:@"Success!"
+                                                       message:@"You successfully reset your achievements!"
+                                                       preferredStyle:UIAlertControllerStyleActionSheet];
+  [yesAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
+    [yesAlert dismissViewControllerAnimated:YES completion:nil];
+  }]];
 
-       resolve(@"reset Achievements");
-     };
+  UIAlertAction* yesButton = [UIAlertAction
+                              actionWithTitle:@"Reset"
+                              style:UIAlertActionStyleDefault
+                              
+                              handler:^(UIAlertAction * action) {
+                                //Handle your yes please button action here
+                                [GKAchievement resetAchievementsWithCompletionHandler: ^ (NSError * error){
+                                  if(error != nil) {reject(@ "Error", @ "Error resetting achievements", error);}
+                                  else {
+                                  [rnView presentViewController:yesAlert animated:YES completion:nil];
+                                   resolve(@ "User Reset Achievements");
+                                }
+                              }];
+                                  }];
+                              
+  UIAlertAction* noButton = [UIAlertAction
+                             actionWithTitle:@"Nah!"
+                             style:UIAlertActionStyleDefault
+                             handler:^(UIAlertAction * action) {
+                               //Handle no, thanks button
+                             }];
+  
+  [alert addAction:yesButton];
+  [alert addAction:noButton];
+  
 
-   }
-   ];
 
-}
-RCT_EXPORT_METHOD(submitScore:(NSDictionary *)options
-
-                  resolve:(RCTPromiseResolveBlock)resolve
-                  rejecter:(RCTPromiseRejectBlock)reject){
-
-  int64_t scoreInt = options[@"score"];
-//   int scoreInt = options[@"score"];
-//    RCTLog(@"user score %@", score);
-   RCTLog(@"user scoreInt %@", scoreInt);
-//  NSNumber* userScore = [options valueForKey:@"score"];
-//  int score = [userScore intValue];
-  NSString *leaderboardId;
-  if(options[@"leaderboardIdentifier"]){
-    leaderboardId=options[@"leaderboardIdentifier"];
-  }else{
-    leaderboardId=_leaderboardIdentifier;
-  }
+   [rnView presentViewController:alert animated:YES completion:nil];
+                                
 
 
-  // Different methods depending on iOS version
-//  if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0){
-    GKScore *scoreSubmitter = [[GKScore alloc] initWithLeaderboardIdentifier: leaderboardId];
-  scoreSubmitter.value = scoreInt;
-    scoreSubmitter.context = 0;
-
-    [GKScore reportScores:@[scoreSubmitter] withCompletionHandler:^(NSError *error) {
-      if (error)
-      {
-       reject(@"Error", @"Error submitting score",error);
-      }else{
-       resolve(@"successfully submited score");
-      }
-    }];
-
-//  }else{
-//    GKScore *scoreSubmitter = [[GKScore alloc] initWithLeaderboardIdentifier:leaderboardId];
-//    scoreSubmitter.value = scoreInt;
-//    [GKScore reportScores:@[scoreSubmitter] withCompletionHandler:^(NSError *error) {
-//      if (error){
-//         reject(@"Error", @"Error submitting score",error);
-//      }else{
-//        resolve(@"successfully submited score");
-//      }
-//    }];
-//  }
 }
 
 
 
 
 
-  RCT_EXPORT_METHOD(reportAchievement:(NSDictionary *)options
 
+/* --------------submitAchievement--------------*/
+
+RCT_EXPORT_METHOD(submitAchievement:(NSDictionary *)options
                     resolve:(RCTPromiseResolveBlock)resolve
                     rejecter:(RCTPromiseRejectBlock)reject){
-//  NSMutableDictionary *args = [command.arguments objectAtIndex:0];
-  NSString *achievementId = options[@"achievementId"];
-  NSString *percent = options[@"percent"];
 
-  float percentFloat = [percent floatValue];
-
-//  __block CDVPluginResult* pluginResult = nil;
+  // Get achievementIdentifier or use default achievementIdentifier
+  NSString *achievementId;
+  if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
+  else achievementId=_achievementIdentifier;
+  
+  //Get achievement progress percentage
+    float percentComplete = [options[@"percentComplete"] floatValue];
+//  float percentFloat = [percent floatValue];
+  BOOL showsCompletionBanner;
+  if(options[@"showsCompletionBanner"])showsCompletionBanner=YES;
+  else showsCompletionBanner=NO;
 
   GKAchievement *achievement = [[GKAchievement alloc] initWithIdentifier: achievementId];
-  if (achievement)
-  {
-    achievement.percentComplete = percentFloat;
-    achievement.showsCompletionBanner = YES;
+  if (achievement){
+    achievement.percentComplete = percentComplete;
+    achievement.showsCompletionBanner = showsCompletionBanner;
 
     NSArray *achievements = [NSArray arrayWithObjects:achievement, nil];
 
     [GKAchievement reportAchievements:achievements withCompletionHandler:^(NSError *error) {
-      if (error != nil)
-      {
-
-        //pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsString:[error localizedDescription]];
-
+      if (error != nil){
          reject(@"Error", @"Error reporting achievement",error);
-      }
-      else
-      {
+      }else{
         // Achievement notification banners are broken on iOS 7 so we do it manually here if 100%:
         if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 &&
             [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0 &&
-            floorf(percentFloat) >= 100)
-        {
+            floorf(percentComplete) >= 100){
           [GKNotificationBanner showBannerWithTitle:@"Achievement" message:@"Completed!" completionHandler:^{}];
         }
-
-//        pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK];
         resolve(achievements);
       }
-//      [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
     }];
   }
 
@@ -367,17 +505,15 @@ RCT_EXPORT_METHOD(submitScore:(NSDictionary *)options
 
 
 
-//-(void)reportScore{
-//  GKScore *score = [[GKScore alloc] initWithLeaderboardIdentifier:_leaderboardIdentifier];
-//  score.value = _score;
-//
-//  [GKScore reportScores:@[score] withCompletionHandler:^(NSError *error) {
-//    if (error != nil) {
-//      NSLog(@"%@", [error localizedDescription]);
-//    }
-//  }];
-//}
-
+//Enable the ability to close Achivments/Leaderboard Game Center Popup from React Native App
+- (void)gameCenterViewControllerDidFinish:(GKGameCenterViewController *)viewController{
+  [viewController dismissViewControllerAnimated:YES completion:nil];
+}
+//Enable the ability to close Achivments/Leaderboard Game Center Popup from React Native App
+- (void)gameCenterViewControllerDidCancel:(GKGameCenterViewController *)gameCenterViewController{
+//- (void)gameCenterViewControllerDidCancel:(GKGameCenterViewController *)viewController{
+  [gameCenterViewController dismissViewControllerAnimated:YES completion:nil];
+}
 
 
 //-(void)updateAchievements{
