@@ -17,6 +17,21 @@ NSString *_leaderboardIdentifier;
 NSString *_achievementIdentifier;
 NSString *_playerId;
 
+static RNGameCenter *SharedInstance = nil;
+static NSString *scoresArchiveKey = @"Scores";
+static NSString *achievementsArchiveKey = @"Achievements";
+static BOOL isGameCenterAvailable()
+{
+  // Check for presence of GKLocalPlayer API.
+  Class gcClass = (NSClassFromString(@"GKLocalPlayer"));
+  
+  // The device must be running running iOS 4.1 or later.
+  NSString *reqSysVer = @"4.1";
+  NSString *currSysVer = [[UIDevice currentDevice] systemVersion];
+  BOOL osVersionSupported = ([currSysVer compare:reqSysVer options:NSNumericSearch] != NSOrderedAscending);
+  
+  return (gcClass && osVersionSupported);
+}
 
 @interface RNGameCenter ()
 
@@ -132,6 +147,25 @@ RCT_EXPORT_METHOD(getPlayer:(RCTPromiseResolveBlock)resolve
     reject(@"Error",@"Error getting user.", e);
   }
 }
+
+/* --------------getPlayer--------------*/
+//let leaderboardIdentifier="high_scores"
+// let achievementIdentifier="pro_award"
+//let achievementIdentifier="novice_award"
+RCT_EXPORT_METHOD(loadPlayers:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  NSArray *playersForIdentifiers=@[@"high_scores"];
+  
+  //  GKLocalPlayer *localPlayer =
+  [GKLocalPlayer loadPlayersForIdentifiers:playersForIdentifiers withCompletionHandler:^(NSArray<GKPlayer *> * _Nullable players, NSError * _Nullable error) {
+      NSLog(@"PLAYERRRS %@",players);
+      if(error)return reject(@"Error",@"no users.", error);
+        resolve(players);
+    }];
+
+}
+
+
 /* --------------getPlayerImage--------------*/
 //
 
@@ -199,14 +233,16 @@ RCT_EXPORT_METHOD(challengeWithScore:(int64_t)playerScore
                   rejecter:(RCTPromiseRejectBlock)reject){
 //  -(void) sendScoreChallengeToPlayers:(NSArray*)players withScore:(int64_t)score message:(NSString*)message {
   NSString *message = options[@"message"];
-  NSArray *players = options[@"players"];
+  //NSArray *players = options[@"players"];
+  NSMutableArray *players=@[@"G:8135064222"];
+  
   NSString *achievementId;
   if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
     //1
     GKScore *gkScore = [[GKScore alloc] initWithLeaderboardIdentifier:achievementId];
     gkScore.value = playerScore;
   
-    //2
+    //2 
    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
     [gkScore issueChallengeToPlayers:players message:message];
   GKGameCenterViewController *leaderboardController = [[GKGameCenterViewController alloc] init];
@@ -371,6 +407,48 @@ RCT_EXPORT_METHOD(showAchievements: (NSDictionary *)options
 };
 
 
+/* --------------achieveAchievement--------------*/
+
+RCT_EXPORT_METHOD(achieveAchievement: (NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  @try {
+    
+//    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+    
+    // Get achievementIdentifier or use default achievementIdentifier
+    NSString *achievementId;
+    if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
+    else achievementId=_achievementIdentifier;
+    
+   
+//    double percentComplete = 0;
+    //if(currentScore)
+    
+    // identifier= kAchievementOneTap;
+    double percentComplete= 100.0;
+    
+    if(achievementId!= NULL)
+    {
+      [GKAchievement loadAchievementsWithCompletionHandler:^(NSArray *achievements, NSError *error){
+        if (error){    reject(@"Error",@"Error opening achievements.", error);}
+        else{
+             resolve(achievements);
+        }
+      }];
+    }else{
+      reject(@"Error",@"Error missing achievement id.", nil);
+      
+    }
+    
+ 
+  }
+  @catch (NSError * e) {
+    reject(@"Error",@"Error opening achievements.", e);
+  }
+};
+
+
 
 /* --------------getAchievements--------------*/
 
@@ -463,7 +541,7 @@ RCT_EXPORT_METHOD(resetAchievements:(RCTPromiseResolveBlock)resolve
 
 /* --------------submitAchievement--------------*/
 
-RCT_EXPORT_METHOD(submitAchievement:(NSDictionary *)options
+RCT_EXPORT_METHOD(reportAchievement:(NSDictionary *)options
                     resolve:(RCTPromiseResolveBlock)resolve
                     rejecter:(RCTPromiseRejectBlock)reject){
 
@@ -491,18 +569,248 @@ RCT_EXPORT_METHOD(submitAchievement:(NSDictionary *)options
          reject(@"Error", @"Error reporting achievement",error);
       }else{
         // Achievement notification banners are broken on iOS 7 so we do it manually here if 100%:
-        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 &&
-            [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0 &&
-            floorf(percentComplete) >= 100){
+//        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 &&
+//            [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0 &&
+//            floorf(percentComplete) >= 100){
           [GKNotificationBanner showBannerWithTitle:@"Achievement" message:@"Completed!" completionHandler:^{}];
-        }
-        resolve(achievements);
+        NSArray *json =[RCTConvert NSArray:achievements];// @{@"achievement":achievements};
+        RCTLog(@"achievements: %@",json);
+        resolve(json);
       }
     }];
   }
-
 }
 
+
+RCT_EXPORT_METHOD(invite:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+GKMatchRequest *request = [[GKMatchRequest alloc] init];
+request.minPlayers = 2;
+request.maxPlayers = 4;
+request.recipients =@[@"G:8135064222"];
+request.inviteMessage = @"Your Custom Invitation Message Here";
+request.recipientResponseHandler = ^(GKPlayer *player, GKInviteeResponse response)
+{
+  resolve(player);
+//  [self updateUIForPlayer: player accepted: (response == GKInviteeResponseAccepted)];
+};
+}
+
+RCT_EXPORT_METHOD(getPlayerFriends:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+    resolve([GKLocalPlayer localPlayer].friends);
+//  [GKLocalPlayer loadPlayersForIdentifiers:players
+//                     withCompletionHandler:^(NSArray<GKPlayer *> * _Nullable players, NSError * _Nullable error) {
+//                       if(error)return reject(@"Error", @"Error reporting achievement",error);
+//                       resolve(players);
+//                     }];
+}
+
+RCT_EXPORT_METHOD(challengeComposer:(int64_t) playerScore
+                  options:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  
+    GKLeaderboard *query = [[GKLeaderboard alloc] init];
+    // Get achievementIdentifier or use default achievementIdentifier
+    NSString *leaderboardId;
+    if(options[@"leaderboardIdentifier"])leaderboardId=options[@"leaderboardIdentifier"];
+    else leaderboardId=_leaderboardIdentifier;
+    
+    query.identifier = leaderboardId;
+    query.playerScope = GKLeaderboardPlayerScopeFriendsOnly;
+    query.range = NSMakeRange(1,100);
+    [query loadScoresWithCompletionHandler:^(NSArray *scores, NSError *error) {
+      NSPredicate *filter = [NSPredicate predicateWithFormat:@"value < %qi",playerScore];
+      NSArray *lesserScores = [scores filteredArrayUsingPredicate:filter];
+//      UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+      // *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+//      [self presentChallengeWithPreselectedScores: lesserScores];
+      GKScore *gkScore = [[GKScore alloc] initWithLeaderboardIdentifier:leaderboardId];
+      gkScore.value = playerScore;
+      NSString *message=@"hey fag, face off?";
+      //NSArray *players=@[@"high_scores"];
+      NSMutableArray *players=@[@"G:8135064222"];
+     
+//      [gkScore issueChallengeToPlayers:players message:message];
+//      GKScore *gkScore = [[GKInvite alloc] initWithLeaderboardIdentifier:leaderboardId];
+      
+      [gkScore challengeComposeControllerWithMessage:message
+                                           players:players
+       //players:[GKLocalPlayer localPlayer].friends
+                                   completionHandler:^(UIViewController * _Nonnull composeController, BOOL didIssueChallenge, NSArray<NSString *> * _Nullable sentPlayerIDs) {
+        if (error) reject(@"Error", @"Error reporting achievement",error);
+        else resolve(sentPlayerIDs);
+      }];
+      }];
+    
+  // Get achievementIdentifier or use default achievementIdentifier
+//  NSString *achievementId;
+//
+//  if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
+//  else achievementId=_achievementIdentifier;
+//
+//  NSString *message=@"hey fag, face off?";
+//  NSArray *players=@[@"high_scores"];
+//  [self abc:@"Yoop"]
+  
+//    GKAchievement *achievement = [[GKAchievement alloc] initWithIdentifier:@"MyGame.bossDefeated"];
+//    achievement.percentComplete = 100.0;
+//    achievement.showsCompletionBanner = NO;
+//
+//    [achievement reportAchievements: [NSArray arrayWithObjects:achievement, nil] WithCompletionHandler:NULL];
+//    [self performSegueWithIdentifier:@"achievementChallenge" sender:achievement];
+//
+
+//  [GKChallenge loadReceivedChallengesWithCompletionHandler:^(NSArray<GKChallenge *> * _Nullable challenges, NSError * _Nullable error) {
+//    <#code#>
+//  }];
+//  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+  // *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+//  [UIViewController  challengeComposeControllerWithMessage:message players:players
+//completionHandler:^(NSError *error) {
+//  if (error) reject(@"Error", @"Error reporting achievement",error);
+//  else  resolve(@"opened challengeComposer!");
+//}];
+//
+  
+}
+//
+//- (void )prepareForSegue:(UIStoryboardSegue *)segue sender:(id)dsender
+//{
+//  if ([segue.identifier isEqualToString:@"achievementChallenge"])
+//  {
+////    MyAchievementChallengeViewController* challengeVC = (MyAchievementChallengeViewController*) segue.destinationViewController;
+////    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+////    [challengeVC performSegueWithIdentifier:@"startPlaying" sender:self];
+//    //challengeVC.delegate = self;
+//    //challengeVC.achievement = (GKAchievement*) sender;
+//  }
+//}
+//
+//- (void) challengeViewController:(MyAchievementChallengeViewController*)controller wasDismissedWithChallenge:(BOOL)issued
+//{
+//  [self dismissViewControllerAnimated:YES completion:NULL];
+//  if (issued)
+//  {
+//    [controller.achievement issueChallengeToPlayers:controller.players message:controller.message];
+//  }
+//}
+
+RCT_EXPORT_METHOD(challengePlayersToCompleteAchievement:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  GKAchievement *achievement;
+  [achievement selectChallengeablePlayers:[GKLocalPlayer localPlayer].friends withCompletionHandler:^(NSArray *challengeablePlayers, NSError *error) {
+    if (challengeablePlayers){
+      resolve(challengeablePlayers);
+//      [self presentChallengeWithPreselectedPlayers: challengeablePlayers];
+    }
+  }];
+}
+
+
+// issued when the player completed a challenge sent by a friend
+
+- (void)player:(GKPlayer *)player didCompleteChallenge:(GKChallenge *)challenge issuedByFriend:(GKPlayer *)friendPlayer{
+  NSLog(@"Challenge %@ sent by %@ completed", challenge.description , friendPlayer.displayName);
+}
+// issued when a friend of the player completed a challenge sent by the player
+
+- (void)player:(GKPlayer *)player issuedChallengeWasCompleted:(GKChallenge *)challenge byFriend:(GKPlayer *)friendPlayer{
+   NSLog(@"Your friend %@ has successfully completed the %@ challenge", friendPlayer.displayName, challenge.description);
+}
+
+// issued when a player wants to play the challenge and has just started the game (from a notification)
+
+- (void)player:(GKPlayer *)player wantsToPlayChallenge:(GKChallenge *)challenge{
+  //[self performSegueWithIdentifier:@"startPlaying" sender:self];
+  
+  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+  [rnView performSegueWithIdentifier:@"startPlaying" sender:self];
+}
+
+// issued when a player wants to play the challenge and is in the game (the game was running while the challenge was sent)
+
+
+- (void)player:(GKPlayer *)player didReceiveChallenge:(GKChallenge *)challenge{
+
+  NSString *friendMsg = [[NSString alloc] initWithFormat:@"Your friend %@ has invited you to a challenge: %@", player.displayName, challenge.message];
+  UIAlertView *theChallenge = [[UIAlertView alloc] initWithTitle:@"Want to take the challenge?" message:friendMsg delegate:self cancelButtonTitle:@"Challenge accepted" otherButtonTitles:@"No", nil];
+  
+  [theChallenge show];
+}
+
+- (void)alertView:(UIAlertView *)alertView clickedButtonAtIndex:(NSInteger)buttonIndex{
+  //if (buttonIndex == 0)  [self performSegueWithIdentifier:@"startPlaying"sender:self];
+  if (buttonIndex == 0) {
+  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+  [rnView performSegueWithIdentifier:@"startPlaying" sender:self];
+  }
+}
+
+//-(void) reportAchievement:(NSString*)identifier percentComplete:(float)percent
+//{
+//  if (isGameCenterAvailable == NO)
+//    return;
+//
+//  GKAchievement* achievement = [self getAchievement:identifier];
+//  if (percent > achievement.percentComplete)
+//  {
+//    NSLog(@"new achievement %@ reported", achievement.identifier);
+//    achievement.percentComplete = percent;
+//    [achievement reportAchievementWithCompletionHandler:^(NSError* error) {
+//      if (achievement.isCompleted) {
+//        [delegate onReportAchievement:(GKAchievement*)achievement];
+//      }
+//    }];
+//
+//    [self saveAchievements];
+//  }
+//}
+//- (NSString*)getGameCenterSavePath{
+//  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+//  return [NSString stringWithFormat:@"%@/GameCenterSave.txt",[paths objectAtIndex:0]];
+//}
+//
+//
+//- (void)saveAchievements:(GKAchievement *)achievement
+//{
+//  NSString *savePath = [self getGameCenterSavePath];
+//
+//  // If achievements already exist, append the new achievement.
+//  NSMutableArray *achievements = [[NSMutableArray alloc] init];// autorelease];
+//  NSMutableDictionary *dict;
+//  if([[NSFileManager defaultManager] fileExistsAtPath:savePath]){
+//    dict = [[NSMutableDictionary alloc] initWithContentsOfFile:savePath];// autorelease];
+//
+//    NSData *data = [dict objectForKey:achievementsArchiveKey];
+//    if(data) {
+//      NSKeyedUnarchiver *unarchiver = [[NSKeyedUnarchiver alloc] initForReadingWithData:data];
+//      achievements = [unarchiver decodeObjectForKey:achievementsArchiveKey];
+//      [unarchiver finishDecoding];
+//      //[unarchiver release];
+//      [dict removeObjectForKey:achievementsArchiveKey]; // remove it so we can add it back again later
+//    }
+//  }else{
+//    dict = [[NSMutableDictionary alloc] init];// autorelease];
+//
+//  }
+//      NSLog(@"saveeee%@",dict);
+//
+//  [achievements addObject:achievement];
+//
+//  // The achievement has been added, now save the file again
+//  NSMutableData *data = [NSMutableData data];
+//  NSKeyedArchiver *archiver = [[NSKeyedArchiver alloc] initForWritingWithMutableData:data];
+//  [archiver encodeObject:achievements forKey:achievementsArchiveKey];
+//  [archiver finishEncoding];
+//  [dict setObject:data forKey:achievementsArchiveKey];
+//  [dict writeToFile:savePath atomically:YES];
+//  //[archiver release];
+//}
+//
 
 
 //Enable the ability to close Achivments/Leaderboard Game Center Popup from React Native App

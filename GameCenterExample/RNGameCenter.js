@@ -18,6 +18,9 @@ return  NativeModules.RNGameCenter.init(options)
 getPlayer:()=>{
 return  NativeModules.RNGameCenter.getPlayer()
 },
+loadPlayers:()=>{
+return  NativeModules.RNGameCenter.loadPlayers()
+},
 getPlayerImage:()=>{
 return  NativeModules.RNGameCenter.getPlayerImage()
 },
@@ -28,6 +31,13 @@ return  NativeModules.RNGameCenter.getPlayerImage()
 challengeWithScore:(options)=>{
   if(!options.score)throw "Missing 'score' from challengeWithScore object";
 return  NativeModules.RNGameCenter.challengeWithScore(options.score,options)
+},
+dev:()=>{
+return  NativeModules.RNGameCenter
+},
+challengeComposer:(options)=>{
+  if(!options.score)throw "Missing 'score' from challengeComposer object";
+return  NativeModules.RNGameCenter.challengeComposer(options.score,options)
 },
 findScoresOfFriendsToChallenge:()=>{
 return  NativeModules.RNGameCenter.findScoresOfFriendsToChallenge({})
@@ -66,6 +76,10 @@ showAchievements:(options={})=>{
 
 return  NativeModules.RNGameCenter.showAchievements(options)
 },
+achieveAchievement:(options={})=>{
+
+return  NativeModules.RNGameCenter.achieveAchievement(options)
+},
 
 getAchievements:()=>{
   //null
@@ -80,7 +94,7 @@ return  NativeModules.RNGameCenter.resetAchievements()
 
 //         entry[@"playerID"] = achievement.playerID;
         // [earntAchievements addObject:entry];
-submitAchievement:(options)=>{
+reportAchievement:(options)=>{
   //optional
   //showsCompletionBanner (boolean)
   // achievementIdentifier (optional, reverts to default)

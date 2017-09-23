@@ -45,6 +45,8 @@ export default class GameCenterExample extends Component {
     this.showLeaderboard=this.showLeaderboard.bind(this)
     this.getAchievements=this.getAchievements.bind(this)
     this.getPlayer=this.getPlayer.bind(this)
+    this.loadPlayers=this.loadPlayers.bind(this)
+    this.reportAchievement=this.reportAchievement.bind(this)
     this.updateAchievements=this.updateAchievements.bind(this)
     this.getLeaderboardPlayers=this.getLeaderboardPlayers.bind(this)
     this.challengeWithScore=this.challengeWithScore.bind(this)
@@ -70,13 +72,15 @@ this.setState({score:this.state.score+1})
 decrementScore(){
 this.setState({score:this.state.score+1})
 }
-
+loadPlayers(){}
 getPlayer(){
   try{
   RNGameCenter.getPlayer().then((o)=>{
-    console.log("o",o)
-  })
-  .catch((e)=>{
+    console.log("getPlayer:",o)
+    return RNGameCenter.loadPlayers()
+  }).then((o)=>{
+    console.log("loadPlayers: ",o)
+    }).catch((e)=>{
     console.warn("e",e)
   })
   } catch (e) {console.log("ERRORRRR RNGameCenter.getPlayer",e);}
@@ -113,7 +117,8 @@ challengeWithScore(){
 
   // RNGameCenter.challengeWithScore().then((o)=>{
   // RNGameCenter.findScoresOfFriendsToChallenge({score:this.state.score,message:"my message",players:["G:8135064222"],achievementIdentifier:"novice_award"}).then((o)=>{
-  RNGameCenter.challengeWithScore({score:this.state.score,message:"my message",players:["G:8135064222"],achievementIdentifier:"novice_award"}).then((o)=>{
+  // RNGameCenter.challengeWithScore({score:this.state.score,message:"my message",players:["G:8135064222"],achievementIdentifier:"novice_award"}).then((o)=>{
+  RNGameCenter.challengeComposer({score:this.state.score,message:"my message",players:["G:8135064222"],achievementIdentifier:"novice_award"}).then((o)=>{
     alert(o)
 
   }).catch((e)=>console.warn("e",e))
@@ -125,7 +130,7 @@ challengeWithScore(){
 
 showAchievements(){
   try{
-  RNGameCenter.showAchievements({achievementIdentifier})
+  RNGameCenter.showAchievements({showsCompletionBanner:true,percentComplete:100,achievementIdentifier})
 } catch (e) {console.log("ERRORRRR RNGameCenter.showAchievements",e);}
 }
 getAchievements(){
@@ -139,6 +144,11 @@ updateAchievements(){
   try{
   RNGameCenter.updateAchievements()
   } catch (e) {console.log("ERRORRRR RNGameCenter.updateAchievements",e);}
+}
+reportAchievement(){
+  try{
+  RNGameCenter.reportAchievement({achievementIdentifier,percentComplete:100,showsCompletionBanner:true})
+  } catch (e) {console.log("ERRORRRR RNGameCenter.reportAchievement",e);}
 }
 resetAchievements(){
   try{
@@ -172,7 +182,20 @@ React Native Game Center
               <TouchableOpacity onPress={this.incrementScore} style={[s.rowItem,s.centerItem]}>
                   <Icon name={"plus"} size={25} color="rgba(0,0,0,0.5)"/>
               </TouchableOpacity>
+
           </View>
+          <TouchableOpacity onPress={()=>{
+
+// NativeModules.RNGameCenter.getPlayerFriends().then((o)=>{
+NativeModules.RNGameCenter.challengeComposer(100,{}).then((o)=>{
+  console.log("o",o)
+})
+.catch((e)=>{
+  console.warn("e",e)
+})
+              }} style={[s.rowItem,s.centerItem]}>
+            <Icon name={"circle"} size={25} color="rgba(0,0,0,0.5)"/>
+          </TouchableOpacity>
 
 
 
@@ -222,6 +245,9 @@ React Native Game Center
 
   <TouchableOpacity onPress={this.getAchievements} style={[s.rowContainer,]}>
     <Icon name={"information"} size={25} color="rgba(0,0,0,0.5)"/>
+  </TouchableOpacity>
+  <TouchableOpacity onPress={this.reportAchievement} style={[s.rowContainer,]}>
+    <Icon name={"trophy"} size={25} color="rgba(0,0,0,0.5)"/>
   </TouchableOpacity>
 
 
