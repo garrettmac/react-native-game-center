@@ -39,7 +39,7 @@ $ npm start
 ```bash
 import RNGameCenter from "react-native-game-center"
 
-RNGameCenter.init().then(player=>console.log("player: ",player))
+RNGameCenter.getPlayer().then(player=>console.log("player: ",player))
 ```
 
 
