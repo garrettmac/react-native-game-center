@@ -7,9 +7,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "test": "jest",
-    "test:watch": "jest -watch",
+
     "commit": "git-cz",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
@@ -29,6 +27,7 @@
     "apple",
     "gamecenter"
   ],
+
   "author": "garrettmac <garrett@vyga.io> (http://vyga.io)",
   "license": "MIT",
   "bugs": {
@@ -43,6 +42,10 @@
   "devDependencies": {
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
-    "semantic-release": "^8.0.3"
+    "semantic-release": "^8.0.3",
+    "react-native": "0.45.1",
+    "react": "16.0.0-alpha.12",
+    "jest": "20.0.4",
+    "react-test-renderer": "^16.0.0-alpha.12"
   }
 }

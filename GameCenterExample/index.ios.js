@@ -22,12 +22,6 @@ let achievementIdentifier="novice_award"
 // console.log(Object.getOwnPropertyNames(RNGameCenter).filter(function (p) {return typeof RNGameCenter[p] === 'function';}));
 // const RNGameCenter=NativeModules.ReactNativeGameCenter
 
-try{
-RNGameCenter.init({leaderboardIdentifier}).then((o)=>{
-  console.log("init: ",o)
-}).catch((e)=>{console.warn("e",e)})
-// RNGameCenter.initPlayer2()
-} catch (e) {console.log("ERRORRRR RNGameCenter.authenticateLocalPlayer",e);}
 
 
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons'
