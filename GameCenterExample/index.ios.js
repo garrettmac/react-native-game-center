@@ -13,7 +13,7 @@ import {
   Text,
   View
 } from 'react-native';
- 
+
 // const { RNGameCenter  } = NativeModules;
 import RNGameCenter from './RNGameCenter';
 let leaderboardIdentifier="high_scores"
