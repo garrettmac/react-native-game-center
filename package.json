@@ -7,8 +7,8 @@
     "lib": "lib"
   },
   "scripts": {
-
     "commit": "git-cz",
+    "test": "jest",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post"
   },
   "repository": {
@@ -47,5 +47,9 @@
     "react": "16.0.0-alpha.12",
     "jest": "20.0.4",
     "react-test-renderer": "^16.0.0-alpha.12"
+  },
+  "jest": {
+    "preset": "react-native"
+
   }
 }
