@@ -1,0 +1,21 @@
+language: node_js
+cache:
+  directories:
+    - node_modules
+notifications:
+  email:
+    recipients:
+      - garrett@vyga.io
+    on_failure: change
+    on_success: change
+node_js:
+  - '7'
+  - '6'
+  - '4'
+before_script:
+  - npm prune
+after_success:
+  - npm run semantic-release
+branches:
+  except:
+    - /^v\d+\.\d+\.\d+$/
