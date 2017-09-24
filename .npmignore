@@ -1,3 +1,23 @@
 GameCenterExample/*
 .DS_Store
 snapshots/*
+
+
+logs
+*.log
+pids
+*.pid
+*.seed
+lib-cov
+coverage
+.lock-wscript
+node_modules
+res
+dist/test/
+coverage/
+
+#build tools
+# .travis.yml
+
+
+#linters
