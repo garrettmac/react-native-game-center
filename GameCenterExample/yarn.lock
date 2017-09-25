@@ -3358,9 +3358,9 @@ react-devtools-core@^2.5.0:
     shell-quote "^1.6.1"
     ws "^2.0.3"
 
-react-native-game-center@^1.2.0:
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/react-native-game-center/-/react-native-game-center-1.2.0.tgz#41ddb438a2b125395428d4b89ac8c50da75bfc7c"
+react-native-game-center@^1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/react-native-game-center/-/react-native-game-center-1.2.1.tgz#cf2a858f2d52a87505e027fc6eb30299886b8cb7"
 
 react-native-vector-icons@^4.4.0:
   version "4.4.0"

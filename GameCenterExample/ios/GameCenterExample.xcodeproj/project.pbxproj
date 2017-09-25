@@ -5,7 +5,6 @@
 	};
 	objectVersion = 46;
 	objects = {
-
 /* Begin PBXBuildFile section */
 		00C302E51ABCBA2D00DB3ED1 /* libRCTActionSheet.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302AC1ABCB8CE00DB3ED1 /* libRCTActionSheet.a */; };
 		00C302E71ABCBA2D00DB3ED1 /* libRCTGeolocation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 00C302BA1ABCB90400DB3ED1 /* libRCTGeolocation.a */; };
@@ -37,7 +36,6 @@
 		2D02E4C81E0B4AEC006451C7 /* libRCTWebSocket-tvOS.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD3E991DF850E9000B6D8A /* libRCTWebSocket-tvOS.a */; };
 		2D02E4C91E0B4AEC006451C7 /* libReact.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 3DAD3EA31DF850E9000B6D8A /* libReact.a */; };
 		2DCD954D1E0B4F2C00145EB5 /* GameCenterExampleTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 00E356F21AD99517003FC87E /* GameCenterExampleTests.m */; };
-		3DBE2D8CFA674BA98D782F6C /* libRNGameCenter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 8097DE0DD21244DAB2954F8A /* libRNGameCenter.a */; };
 		4D6C44FEEE584BFAB3FF8B7B /* Feather.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 016E205A00EA4BA6BEF7076F /* Feather.ttf */; };
 		5C042277061C4BE087F2E307 /* Entypo.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 7BACFFAE20C34921972FD65C /* Entypo.ttf */; };
 		5E9157361DD0AC6A00FF2AA8 /* libRCTAnimation.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5E9157331DD0AC6500FF2AA8 /* libRCTAnimation.a */; };
@@ -50,6 +48,7 @@
 		9B916FA8E6304D959A96336A /* FontAwesome.ttf in Resources */ = {isa = PBXBuildFile; fileRef = DF9DCC814E124F3D9661B74A /* FontAwesome.ttf */; };
 		ADBDB9381DFEBF1600ED6528 /* libRCTBlob.a in Frameworks */ = {isa = PBXBuildFile; fileRef = ADBDB9271DFEBF0700ED6528 /* libRCTBlob.a */; };
 		AFA7946A198345B6A679734C /* Zocial.ttf in Resources */ = {isa = PBXBuildFile; fileRef = 4BD766BD632F48578A7592D8 /* Zocial.ttf */; };
+		C665BB9B28524D199B10ACE9 /* libRNGameCenter.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6DBBAB87DA7444579FE2D614 /* libRNGameCenter.a */; };
 		EE7F1DEC56BD40B385FB926D /* libRNVectorIcons.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 0F5C13AA901E4598AC360970 /* libRNVectorIcons.a */; };
 /* End PBXBuildFile section */
 
@@ -138,9 +137,9 @@
 			remoteGlobalIDString = 5DBEB1501B18CEA900B34395;
 			remoteInfo = RNVectorIcons;
 		};
-		0E6934171F789EE900C9C9B8 /* PBXContainerItemProxy */ = {
+		0E6934591F78A26500C9C9B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 381EBA97B6FD49199A251A25 /* RNGameCenter.xcodeproj */;
+			containerPortal = 6F4B123432D0465A96733E75 /* RNGameCenter.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 134814201AA4EA6300B7C361;
 			remoteInfo = RNGameCenter;
@@ -327,13 +326,13 @@
 		146833FF1AC3E56700842450 /* React.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = React.xcodeproj; path = "../node_modules/react-native/React/React.xcodeproj"; sourceTree = "<group>"; };
 		2D02E47B1E0B4A5D006451C7 /* GameCenterExample-tvOS.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "GameCenterExample-tvOS.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 		2D02E4901E0B4A5D006451C7 /* GameCenterExample-tvOSTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "GameCenterExample-tvOSTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
-		381EBA97B6FD49199A251A25 /* RNGameCenter.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNGameCenter.xcodeproj; path = "../node_modules/react-native-game-center/RNGameCenter/ios/RNGameCenter.xcodeproj"; sourceTree = "<group>"; };
 		4BD766BD632F48578A7592D8 /* Zocial.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Zocial.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Zocial.ttf"; sourceTree = "<group>"; };
 		4F539DC99FB3468598FD6B95 /* SimpleLineIcons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = SimpleLineIcons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/SimpleLineIcons.ttf"; sourceTree = "<group>"; };
 		5E91572D1DD0AC6500FF2AA8 /* RCTAnimation.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTAnimation.xcodeproj; path = "../node_modules/react-native/Libraries/NativeAnimation/RCTAnimation.xcodeproj"; sourceTree = "<group>"; };
+		6DBBAB87DA7444579FE2D614 /* libRNGameCenter.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNGameCenter.a; sourceTree = "<group>"; };
+		6F4B123432D0465A96733E75 /* RNGameCenter.xcodeproj */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = "wrapper.pb-project"; name = RNGameCenter.xcodeproj; path = "../node_modules/react-native-game-center/RNGameCenter/ios/RNGameCenter.xcodeproj"; sourceTree = "<group>"; };
 		78C398B01ACF4ADC00677621 /* RCTLinking.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTLinking.xcodeproj; path = "../node_modules/react-native/Libraries/LinkingIOS/RCTLinking.xcodeproj"; sourceTree = "<group>"; };
 		7BACFFAE20C34921972FD65C /* Entypo.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Entypo.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Entypo.ttf"; sourceTree = "<group>"; };
-		8097DE0DD21244DAB2954F8A /* libRNGameCenter.a */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = archive.ar; path = libRNGameCenter.a; sourceTree = "<group>"; };
 		832341B01AAA6A8300B99B32 /* RCTText.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = RCTText.xcodeproj; path = "../node_modules/react-native/Libraries/Text/RCTText.xcodeproj"; sourceTree = "<group>"; };
 		8E95A545BE514C49868305CE /* Foundation.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Foundation.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Foundation.ttf"; sourceTree = "<group>"; };
 		9E70AD41EDFF452A89E00958 /* Ionicons.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = Ionicons.ttf; path = "../node_modules/react-native-vector-icons/Fonts/Ionicons.ttf"; sourceTree = "<group>"; };
@@ -373,7 +372,7 @@
 				00C302EA1ABCBA2D00DB3ED1 /* libRCTVibration.a in Frameworks */,
 				139FDEF61B0652A700C62182 /* libRCTWebSocket.a in Frameworks */,
 				EE7F1DEC56BD40B385FB926D /* libRNVectorIcons.a in Frameworks */,
-				3DBE2D8CFA674BA98D782F6C /* libRNGameCenter.a in Frameworks */,
+				C665BB9B28524D199B10ACE9 /* libRNGameCenter.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -465,7 +464,7 @@
 			isa = PBXGroup;
 			children = (
 				0F5C13AA901E4598AC360970 /* libRNVectorIcons.a */,
-				8097DE0DD21244DAB2954F8A /* libRNGameCenter.a */,
+				6DBBAB87DA7444579FE2D614 /* libRNGameCenter.a */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -486,10 +485,10 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
-		0E6934141F789EE800C9C9B8 /* Products */ = {
+		0E6934561F78A26500C9C9B8 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				0E6934181F789EE900C9C9B8 /* libRNGameCenter.a */,
+				0E69345A1F78A26500C9C9B8 /* libRNGameCenter.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -579,7 +578,7 @@
 				00C302DF1ABCB9EE00DB3ED1 /* RCTVibration.xcodeproj */,
 				139FDEE61B06529A00C62182 /* RCTWebSocket.xcodeproj */,
 				D2584B2DD7B54A9A94B90957 /* RNVectorIcons.xcodeproj */,
-				381EBA97B6FD49199A251A25 /* RNGameCenter.xcodeproj */,
+				6F4B123432D0465A96733E75 /* RNGameCenter.xcodeproj */,
 			);
 			name = Libraries;
 			sourceTree = "<group>";
@@ -815,8 +814,8 @@
 					ProjectRef = 146833FF1AC3E56700842450 /* React.xcodeproj */;
 				},
 				{
-					ProductGroup = 0E6934141F789EE800C9C9B8 /* Products */;
-					ProjectRef = 381EBA97B6FD49199A251A25 /* RNGameCenter.xcodeproj */;
+					ProductGroup = 0E6934561F78A26500C9C9B8 /* Products */;
+					ProjectRef = 6F4B123432D0465A96733E75 /* RNGameCenter.xcodeproj */;
 				},
 				{
 					ProductGroup = 0E1656B51F7481BF004146A5 /* Products */;
@@ -911,11 +910,11 @@
 			remoteRef = 0E1656B81F7481BF004146A5 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		0E6934181F789EE900C9C9B8 /* libRNGameCenter.a */ = {
+		0E69345A1F78A26500C9C9B8 /* libRNGameCenter.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libRNGameCenter.a;
-			remoteRef = 0E6934171F789EE900C9C9B8 /* PBXContainerItemProxy */;
+			remoteRef = 0E6934591F78A26500C9C9B8 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 		139105C11AF99BAD00B5F7CC /* libRCTSettings.a */ = {
@@ -1225,7 +1224,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -1251,7 +1249,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
@@ -1334,7 +1331,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -1370,7 +1366,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				OTHER_LDFLAGS = (
 					"-ObjC",
@@ -1400,7 +1395,6 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.GameCenterExample-tvOSTests";
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -1425,7 +1419,6 @@
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
-					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 					"\"$(SRCROOT)/$(TARGET_NAME)\"",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = "com.facebook.REACT.GameCenterExample-tvOSTests";
