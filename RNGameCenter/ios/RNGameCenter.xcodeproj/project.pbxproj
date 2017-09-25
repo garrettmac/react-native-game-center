@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0E69341B1F78A02C00C9C9B8 /* GameKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0E69341A1F78A02C00C9C9B8 /* GameKit.framework */; };
 		B3E7B58A1CC2AC0600A0062D /* RNGameCenter.m in Sources */ = {isa = PBXBuildFile; fileRef = B3E7B5891CC2AC0600A0062D /* RNGameCenter.m */; };
 /* End PBXBuildFile section */
 
@@ -23,6 +24,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0E69341A1F78A02C00C9C9B8 /* GameKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = GameKit.framework; path = System/Library/Frameworks/GameKit.framework; sourceTree = SDKROOT; };
 		134814201AA4EA6300B7C361 /* libRNGameCenter.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libRNGameCenter.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		B3E7B5881CC2AC0600A0062D /* RNGameCenter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RNGameCenter.h; sourceTree = "<group>"; };
 		B3E7B5891CC2AC0600A0062D /* RNGameCenter.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RNGameCenter.m; sourceTree = "<group>"; };
@@ -33,12 +35,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				0E69341B1F78A02C00C9C9B8 /* GameKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0E6934191F78A02C00C9C9B8 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				0E69341A1F78A02C00C9C9B8 /* GameKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		134814211AA4EA7D00B7C361 /* Products */ = {
 			isa = PBXGroup;
 			children = (
@@ -53,6 +64,7 @@
 				B3E7B5881CC2AC0600A0062D /* RNGameCenter.h */,
 				B3E7B5891CC2AC0600A0062D /* RNGameCenter.m */,
 				134814211AA4EA7D00B7C361 /* Products */,
+				0E6934191F78A02C00C9C9B8 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -204,7 +216,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				HEADER_SEARCH_PATHS = (
-				"$(inherited)",
+					"$(inherited)",
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					"$(SRCROOT)/../../../React/**",
 					"$(SRCROOT)/../../react-native/React/**",

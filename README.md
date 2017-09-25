@@ -2,6 +2,13 @@
 
 # React Native Game Center
 
+<p align="center">
+<img alt="app" src="snapshots/app.png"/>
+<img alt="achivements" src="snapshots/app-achivements.png"/>
+<img alt="leaderboard" src="snapshots/app-leaderboard.png"/>
+<img alt="ifnotloggedin" src="snapshots/ifnotloggedin.png"/>
+
+</p>
 
 # Contents
 
