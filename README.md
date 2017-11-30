@@ -29,6 +29,8 @@ hire me!
 - [Leaderboard Methods](#leaderboard-methods)
   * [openLeaderboardModal()](#openleaderboardmodal--promise--)
   * [submitLeaderboardScore()](#submitleaderboardscore--promise--)
+  * [getLeaderboardPlayers()](#getLeaderboardPlayers--promise--)
+  * [getTopLeaderboardPlayers()](#getTopLeaderboardPlayers--promise--)
 - [Achievements Methods](#achievements-methods)
   * [openAchievementModal()](#openachievementmodal--promise--)
   * [getAchievements()](#getachievements--promise--)
@@ -284,6 +286,11 @@ Error fetching player friends
       - [Parameters](#parameters-5)
       - [Usage](#usage-4)
       - [Response](#response-2)
+  * [getLeaderboardPlayers <Promise?>](#getleaderboardplayers--promise--)
+      - [Details](#details-6)
+      - [Parameters](#parameters-6)
+      - [Usage](#usage-5)
+      - [Response](#response-3)
 
 
 
@@ -380,8 +387,118 @@ GameCenter.submitLeaderboardScore(options)
 "Error submitting score."
 ```
 
+## getLeaderboardPlayers <Promise?>
+
+#### Details
+Get information about certain player ids on the leaderboard
+
+#### Parameters
+
+| Name  | Required | Default    | Description |
+|--------------|--------------|--------------|--------------|
+| playerIds[] |  Yes | n/a | An array of player ids to recieve data for |
+| leaderboardIdentifier |  No if set in init | Set in init |`leaderboardIdentifier` set up in Itunes Connect  |
 
 
+#### Usage
+
+
+
+**Basic**
+```jsx
+let options={
+  playerIds: ["player_1","player_2"], //Please note that this is the player id as set by apple and not the user name
+  leaderboarIdentifier:"some_other_leaderboard" //Optional
+};
+
+GameCenter.getLeaderboardPlayers(options)
+  .then(res=>{
+    this.setState({players:res})
+  })
+  .catch(console.warn("Leaderboard fetch failed"))
+
+```
+
+
+#### Response
+
+**Success**
+
+```json
+[
+  {
+    "rank":"rank of player on global leaderboard",
+    "value":"score of the player on the leaderboard",
+    "displayName":"display name of the player",
+    "alias":"alias of the player",
+    "playerID":"id of the player"
+  }
+]
+```
+
+
+**Failed**
+
+```json
+"Error getting leaderboard players."
+```
+
+
+## getTopLeaderboardPlayers <Promise?>
+
+#### Details
+Get information about top players on the leaderboard
+
+#### Parameters
+
+| Name  | Required | Default    | Description |
+|--------------|--------------|--------------|--------------|
+| count |  Yes | n/a | Anmount of top players to fetch |
+| leaderboardIdentifier |  No if set in init | Set in init |`leaderboardIdentifier` set up in Itunes Connect  |
+
+
+#### Usage
+
+
+
+**Basic**
+```jsx
+let options={
+  count:4,
+  leaderboarIdentifier:"some_other_leaderboard" //Optional
+};
+
+GameCenter.getLeaderboardPlayers(options)
+  .then(res=>{
+    this.setState({topPlayers:res})
+  })
+  .catch(console.warn("Leaderboard fetch failed"))
+
+```
+
+
+#### Response
+
+**Success**
+
+```json
+[
+  {
+    "rank":"rank of player on global leaderboard",
+    "value":"score of the player on the leaderboard",
+    "displayName":"display name of the player",
+    "alias":"alias of the player",
+    "playerID":"id of the player"
+  }
+]
+```
+
+
+**Failed**
+
+```json
+"Error getting top leaderboard players."
+```
 
 
 
