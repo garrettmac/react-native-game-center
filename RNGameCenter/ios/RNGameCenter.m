@@ -100,37 +100,9 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* -----------------------------------------------------------------------------------------------------------------------------------------
  Player
  -----------------------------------------------------------------------------------------------------------------------------------------*/
-
-
-
 
 /* --------------getPlayer--------------*/
 
@@ -140,7 +112,6 @@ RCT_EXPORT_METHOD(getPlayer:(RCTPromiseResolveBlock)resolve
      reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
-
 
   @try {
     GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
@@ -648,20 +619,19 @@ RCT_EXPORT_METHOD(submitAchievementScore:(NSDictionary *)options
   @try{
 
 
-  NSString *percent = [options objectForKey:@"percentComplete"];
+  NSString *percent = options[@"percentComplete"];
 
-     RCTLog(@"percent: %@",percent);
   float percentFloat = [percent floatValue];
-    RCTLog(@"percentFloat: %f",percentFloat);
   NSString *achievementId;
   if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
   else achievementId=_achievementIdentifier;
-//
-    if(!achievementId)return reject(@"Error",@"No Game Center `achievementIdentifier` passed and no default set", nil);
-    return;
+
+  RCTLog(@"Will store: %@ (%f) on '%@'", percent, percentFloat, achievementId);
+
+  if(!achievementId)return reject(@"Error",@"No Game Center `achievementIdentifier` passed and no default set", nil);
   BOOL showsCompletionBanner=YES;
   if(options[@"hideCompletionBanner"])showsCompletionBanner=NO;
-    NSLog(@"showsCompletionBanner %d",showsCompletionBanner);
+  NSLog(@"showsCompletionBanner %d",showsCompletionBanner);
   GKAchievement *achievement = [[GKAchievement alloc] initWithIdentifier: achievementId];
   if (achievement){
     achievement.percentComplete = percentFloat;
@@ -670,8 +640,9 @@ RCT_EXPORT_METHOD(submitAchievementScore:(NSDictionary *)options
     NSArray *achievements = [NSArray arrayWithObjects:achievement, nil];
 
     [GKAchievement reportAchievements:achievements withCompletionHandler:^(NSError *error) {
-      if (error != nil){reject(@"Error",@"Game Center setting Achievement", error);}
-    else{
+      if (error != nil){
+        reject(@"Error",@"Game Center setting Achievement", error);
+      }else{
         // Achievement notification banners are broken on iOS 7 so we do it manually here if 100%:
         if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 &&
             [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0 &&
@@ -679,11 +650,7 @@ RCT_EXPORT_METHOD(submitAchievementScore:(NSDictionary *)options
         {
           [GKNotificationBanner showBannerWithTitle:@"Achievement" message:@"Completed!" completionHandler:^{}];
         }
-
-
-      //RCTLog(@"achievements: %@",achievements);
-      NSLog(@"achievements: %@",achievements);
-      resolve(achievements);
+        resolve(achievements);
       }
     }];
   }
