@@ -11,6 +11,8 @@
 #import <React/RCTUtils.h>
 #import <React/RCTConvert.h>
 #import <React/RCTLog.h>
+#import <Foundation/Foundation.h>
+
 
 //Global Defaults
 NSString *_leaderboardIdentifier;
@@ -39,6 +41,12 @@ static RNGameCenter *SharedInstance = nil;
 @property (nonatomic, strong) GKGameCenterViewController *gkView;
 @property (nonatomic, strong) UIViewController *reactNativeViewController;
 @property (nonatomic, strong) NSNumber *_currentAdditionCounter;
+@end
+
+@interface MobSvcSavedGameData : NSObject
+    @property (readwrite, retain) NSString *data;
+    +(instancetype)sharedGameData;
+    -(void)reset;
 @end
 
 
@@ -1016,6 +1024,80 @@ RCT_EXPORT_METHOD(challengePlayersToCompleteAchievement:(NSDictionary *)options
 //  }];
 //}
 
+RCT_EXPORT_METHOD(loadSavedGameData:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+    GKLocalPlayer *mobSvcAccount = [GKLocalPlayer localPlayer];
+    
+    if(!mobSvcAccount.isAuthenticated){
+        reject(@"Error",@"Can't load game: Game center is not initalized...", nil);
+        return;
+    }
+
+    [mobSvcAccount fetchSavedGamesWithCompletionHandler:^(NSArray<GKSavedGame *> * _Nullable savedGames, NSError * _Nullable error) {
+
+        if(error != nil) {
+            NSLog(@"Failed to prepare saved game data: %@", error.description);
+            reject(@"Error",@"Can't load game", nil);
+        }
+        
+        GKSavedGame *savedGameToLoad = nil;
+        for(GKSavedGame *savedGame in savedGames) {            NSLog(@"Successfully downloaded saved game data");
+            if([savedGame.name isEqualToString:options[@"name"]]) {
+                if (savedGameToLoad == nil || savedGameToLoad.modificationDate < savedGame.modificationDate) {
+                    savedGameToLoad = savedGame;
+                }
+            }
+        }
+        if(savedGameToLoad == nil) {
+            resolve(@{
+                @"isConflict": @false,
+                @"data": @""
+            });
+            return;
+        }
+        [savedGameToLoad loadDataWithCompletionHandler:^(NSData * _Nullable data, NSError * _Nullable error) {
+            if(error == nil) {
+                MobSvcSavedGameData *savedGameData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+                NSLog(@"Successfully downloaded saved game data");
+                resolve(@{
+                    @"isConflict": @false,
+                    @"data": savedGameData.data
+                });
+            } else {
+                NSLog(@"Failed to download saved game data: %@", error.description);
+                reject(@"Error",@"Can't load game", nil);
+            }
+        }];
+    }];
+}
+                
+
+RCT_EXPORT_METHOD(uploadSavedGameData:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+    GKLocalPlayer *mobSvcAccount = [GKLocalPlayer localPlayer];
+    
+    if(!mobSvcAccount.isAuthenticated) {
+        reject(@"Error",@"Can't save game: Game center is not initalized...", nil);
+        return;
+    }
+    MobSvcSavedGameData *savedGameData = [[MobSvcSavedGameData alloc] init];
+    savedGameData.data = options[@"data"];
+    [mobSvcAccount saveGameData:[NSKeyedArchiver archivedDataWithRootObject:savedGameData] withName:options[@"name"] completionHandler:^(GKSavedGame * _Nullable savedGame __unused, NSError * _Nullable error) {
+        if(error == nil)
+        {
+            NSLog(@"Successfully uploaded saved game data");
+            resolve(@"Saved game data");
+        }
+        else
+        {
+            NSLog(@"Failed to upload saved game data: %@", error.description);
+            reject(@"Error",@"Can't save game", nil);
+        }
+    }];
+}
+
 
 
 
@@ -1242,6 +1324,44 @@ RCT_EXPORT_METHOD(challengePlayersToCompleteAchievement:(NSDictionary *)options
  }];
  ...
  }*/
+@end
+
+
+@implementation MobSvcSavedGameData
+
+#pragma mark MobSvcSavedGameData implementation
+
+static NSString * const sgDataKey = @"data";
+
++ (instancetype)sharedGameData {
+    static id sharedInstance = nil;
+
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self alloc] init];
+    });
+
+    return sharedInstance;
+}
+
+- (void)reset
+{
+    self.data = nil;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder
+{
+    [encoder encodeObject:self.data forKey: sgDataKey];
+}
+
+- (nullable instancetype)initWithCoder:(nonnull NSCoder *)decoder {
+    self = [self init];
+    if (self) {
+        self.data = [decoder decodeObjectForKey:sgDataKey];
+    }
+    return self;
+}
+
 @end
 
 
