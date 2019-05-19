@@ -11,16 +11,20 @@ const RNGameCenter = {
     return  NativeModules.RNGameCenter.init(options)
   },
 
+  userLogged:()=>{
+    return NativeModules.RNGameCenter.userLogged()
+  },
+
   getPlayer:()=>{
-    return  NativeModules.RNGameCenter.getPlayer()
+    return NativeModules.RNGameCenter.getPlayer()
   },
 
   getPlayerFriends:()=>{
-    return  NativeModules.RNGameCenter.getPlayerFriends()
+    return NativeModules.RNGameCenter.getPlayerFriends()
   },
 
   getPlayerImage:()=>{
-    return  NativeModules.RNGameCenter.getPlayerImage()
+    return NativeModules.RNGameCenter.getPlayerImage()
   },
 
   // challengeWithScore:(options)=>{
@@ -35,13 +39,12 @@ const RNGameCenter = {
   openLeaderboardModal:(options)=>{
     //props
     //leaderboardIdentifier or Defaults back to init leaderboardIdentifier
-    return  NativeModules.RNGameCenter.openLeaderboardModal(options)
+    return NativeModules.RNGameCenter.openLeaderboardModal(options)
   },
   submitLeaderboardScore:(options)=>{
     //optional: leaderboardIdentifier or Defaults back to init leaderboardIdentifier
     //required: score
-
-    if(!options.score)throw "Missing 'score' from submitLeaderboardScore object";
+    if(!options.score) throw "Missing 'score' from submitLeaderboardScore object";
     else return NativeModules.RNGameCenter.submitLeaderboardScore(options.score,options)
   },
 
@@ -55,15 +58,15 @@ const RNGameCenter = {
 
   // https://developer.apple.com/documentation/gamekit/gkachievement
   openAchievementModal:(options={})=>{
-    return  NativeModules.RNGameCenter.openAchievementModal(options)
+    return NativeModules.RNGameCenter.openAchievementModal(options)
   },
 
   getAchievements:()=>{
-    return  NativeModules.RNGameCenter.getAchievements()
+    return NativeModules.RNGameCenter.getAchievements()
   },
 
   resetAchievements:(options={})=>{
-    return  NativeModules.RNGameCenter.resetAchievements(options)
+    return NativeModules.RNGameCenter.resetAchievements(options)
   },
 
   // entry[@"playerID"] = achievement.playerID;
@@ -74,18 +77,18 @@ const RNGameCenter = {
     // achievementIdentifier (optional, reverts to default)
     //required
     // percentComplete (number/float 1-100)
-    if(!options.percentComplete)throw "Missing 'percentComplete' from submitAchievementScore object";
+    if(!options.percentComplete) throw "Missing 'percentComplete' from submitAchievementScore object";
     // if(!options.showsCompletionBanner)
-    return  NativeModules.RNGameCenter.submitAchievementScore(options)
+    return NativeModules.RNGameCenter.submitAchievementScore(options)
     // return  NativeModules.RNGameCenter.submitAchievementScore(options.percentComplete,options)
   },
 
   uploadSavedGameData:(options)=> {
-    return  NativeModules.RNGameCenter.uploadSavedGameData(options);
+    return NativeModules.RNGameCenter.uploadSavedGameData(options);
   },
 
   loadSavedGameData:(options)=> {
-    return  NativeModules.RNGameCenter.loadSavedGameData(options);
+    return NativeModules.RNGameCenter.loadSavedGameData(options);
   },
 
 };
