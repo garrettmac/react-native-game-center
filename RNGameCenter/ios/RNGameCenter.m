@@ -11,6 +11,8 @@
 #import <React/RCTUtils.h>
 #import <React/RCTConvert.h>
 #import <React/RCTLog.h>
+#import <Foundation/Foundation.h>
+
 
 //Global Defaults
 NSString *_leaderboardIdentifier;
@@ -39,6 +41,12 @@ static RNGameCenter *SharedInstance = nil;
 @property (nonatomic, strong) GKGameCenterViewController *gkView;
 @property (nonatomic, strong) UIViewController *reactNativeViewController;
 @property (nonatomic, strong) NSNumber *_currentAdditionCounter;
+@end
+
+@interface MobSvcSavedGameData : NSObject
+    @property (readwrite, retain) NSString *data;
+    +(instancetype)sharedGameData;
+    -(void)reset;
 @end
 
 
@@ -84,64 +92,39 @@ RCT_EXPORT_METHOD(init:(NSDictionary *)options
             NSLog(@"%@",[error localizedDescription]);
             reject(@"Error", @"Error initiating Game Center make sure you are enrolled in the apple program, you set up a game center in itunes connect, and you registed it to the correct and matching app bundle id",error);
           }else{
-                        //set to global
+            //set to global
             _isGameCenterAvailable=YES;
             _leaderboardIdentifier=leaderboardIdentifier;
             resolve(@"init success");
           }
         }];
       }else{
-
         reject(@"Error", @"Error initiating Game Center Player",error);
       }
     }
   };
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+RCT_EXPORT_METHOD(userLogged:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  resolve(_isGameCenterAvailable!=NO?@true:@false);
+}
 
 /* -----------------------------------------------------------------------------------------------------------------------------------------
  Player
  -----------------------------------------------------------------------------------------------------------------------------------------*/
-
-
-
 
 /* --------------getPlayer--------------*/
 
 RCT_EXPORT_METHOD(getPlayer:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
   if(_isGameCenterAvailable==NO){
-     reject(@"Error",@"Game Center is Unavailable", nil);
+    reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
 
   @try {
+
      [[GKLocalPlayer localPlayer] generateIdentityVerificationSignatureWithCompletionHandler:^(NSURL *publicKeyUrl, NSData *signature, NSData *salt, uint64_t timestamp, NSError *error) {
           NSDictionary* user = @{
                                  @"playerId":[GKLocalPlayer localPlayer].playerID,
@@ -155,6 +138,7 @@ RCT_EXPORT_METHOD(getPlayer:(RCTPromiseResolveBlock)resolve
                                  };
           resolve(user);
       }];
+    
   }@catch (NSError * e) {
     reject(@"Error",@"Error getting user.", e);
   }
@@ -221,49 +205,44 @@ RCT_EXPORT_METHOD(getPlayerImage:(RCTPromiseResolveBlock)resolve
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
+
   @try{
+    GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
+    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
+                                                         NSUserDomainMask, YES);
+    NSString *documentsDirectory = [paths objectAtIndex:0];
+    NSString *path = [documentsDirectory stringByAppendingPathComponent:
+                      @"user.jpg" ];
 
-   GKLocalPlayer *localPlayer = [GKLocalPlayer localPlayer];
+    // Check if the user photo is cached
+    BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
 
+    if(fileExists){
+      // Return it if it does
+      NSDictionary *json = @{@"image":path};
+      resolve(json);
+    }else{
+      // Else load it from the game center
+      [localPlayer loadPhotoForSize:GKPhotoSizeSmall withCompletionHandler:^(UIImage *photo, NSError *error) {
+        if (error!=nil)return reject(@"Error", @"Error fetching player image",error);
 
-  NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory,
-                                                       NSUserDomainMask, YES);
-  NSString *documentsDirectory = [paths objectAtIndex:0];
-  NSString *path = [documentsDirectory stringByAppendingPathComponent:
-                    @"user.jpg" ];
-
-  // Check if the user photo is cached
-  BOOL fileExists = [[NSFileManager defaultManager] fileExistsAtPath:path];
-
-  if(fileExists){
-    // Return it if it does
-
-    NSDictionary *json = @{@"image":path};
-    resolve(json);
-
-  }else{
-    // Else load it from the game center
-    [localPlayer loadPhotoForSize:GKPhotoSizeSmall withCompletionHandler:^(UIImage *photo, NSError *error) {
-      if (error!=nil)return reject(@"Error", @"Error fetching player image",error);
-
-      if (photo != nil){
-        NSData* data = UIImageJPEGRepresentation(photo, 0.8);
-        [data writeToFile:path atomically:YES];
-        NSDictionary *json = @{@"image":path};
-        resolve(json);
-      }else{
-//        NSMutableDictionary *json = @{@"image":nil};
-       NSMutableDictionary *json = [NSMutableDictionary dictionary];
-       json[@"image"] = nil;
-        resolve(json);
-      }
+        if (photo != nil){
+          NSData* data = UIImageJPEGRepresentation(photo, 0.8);
+          [data writeToFile:path atomically:YES];
+          NSDictionary *json = @{@"image":path};
+          resolve(json);
+        }else{
+          NSMutableDictionary *json = [NSMutableDictionary dictionary];
+          json[@"image"] = nil;
+          resolve(json);
+        }
 
 
-    }];
+      }];
+    }
+  }@catch (NSError * e) {
+    reject(@"Error",@"Error fetching player image", e);
   }
-}@catch (NSError * e) {
-  reject(@"Error",@"Error fetching player image", e);
-}
 }
 
 //
@@ -365,17 +344,6 @@ RCT_EXPORT_METHOD(openLeaderboardModal:(NSDictionary *)options
                   rejecter:(RCTPromiseRejectBlock)reject){
 
   if(_isGameCenterAvailable==NO){
-    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-    UIAlertController *gameCenterIsUnavailablePopup = [UIAlertController
-                                                       alertControllerWithTitle:@"Game Center is unavailable!"
-                                                       message:@"You must be logged in to Game Center!"
-                                                       preferredStyle:UIAlertControllerStyleActionSheet];
-    [gameCenterIsUnavailablePopup addAction:[UIAlertAction actionWithTitle:@"Dismiss"
-                                                                     style:UIAlertActionStyleCancel
-                                                                   handler:^(UIAlertAction *action) {
-                                                                     [gameCenterIsUnavailablePopup dismissViewControllerAnimated:YES completion:nil];
-                                                                   }]];
-       [rnView presentViewController:gameCenterIsUnavailablePopup animated:YES completion:nil];
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
@@ -404,44 +372,31 @@ RCT_EXPORT_METHOD(submitLeaderboardScore:(int64_t)score
                   rejecter:(RCTPromiseRejectBlock)reject){
 
   if(_isGameCenterAvailable==NO){
-    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-    UIAlertController *gameCenterIsUnavailablePopup = [UIAlertController
-                                                       alertControllerWithTitle:@"Game Center is unavailable!"
-                                                       message:@"You must be logged in to Game Center!"
-                                                       preferredStyle:UIAlertControllerStyleActionSheet];
-    [gameCenterIsUnavailablePopup addAction:[UIAlertAction actionWithTitle:@"Dismiss"
-                                                                     style:UIAlertActionStyleCancel
-                                                                   handler:^(UIAlertAction *action) {
-                                                                     [gameCenterIsUnavailablePopup dismissViewControllerAnimated:YES completion:nil];
-                                                                   }]];
-    [rnView presentViewController:gameCenterIsUnavailablePopup animated:YES completion:nil];
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
 
-
   @try{
   // Get leaderboardIdentifier or use default leaderboardIdentifier
-  NSString *leaderboardId;
-  if(options[@"leaderboardIdentifier"])leaderboardId=options[@"leaderboardIdentifier"];
-  else leaderboardId=_leaderboardIdentifier;
+    NSString *leaderboardId;
+    if(options[@"leaderboardIdentifier"])leaderboardId=options[@"leaderboardIdentifier"];
+    else leaderboardId=_leaderboardIdentifier;
 
+    GKScore *scoreSubmitter = [[GKScore alloc] initWithLeaderboardIdentifier: leaderboardId];
+    scoreSubmitter.value = score;
+    scoreSubmitter.context = 0;
 
-  GKScore *scoreSubmitter = [[GKScore alloc] initWithLeaderboardIdentifier: leaderboardId];
-  scoreSubmitter.value = score;
-  scoreSubmitter.context = 0;
-
-  [GKScore reportScores:@[scoreSubmitter] withCompletionHandler:^(NSError *error) {
-    if (error)
-    {
-      reject(@"Error", @"Error submitting score",error);
-    }else{
-      resolve(@"Successfully submitted score");
-    }
-  }];
-}@catch (NSError * e) {
-  reject(@"Error",@"Error submitting score.", e);
-}
+    [GKScore reportScores:@[scoreSubmitter] withCompletionHandler:^(NSError *error) {
+      if (error)
+      {
+        reject(@"Error", @"Error submitting score",error);
+      }else{
+        resolve(@"Successfully submitted score");
+      }
+    }];
+  }@catch (NSError * e) {
+    reject(@"Error",@"Error submitting score.", e);
+  }
 }
 
 
@@ -455,39 +410,33 @@ RCT_EXPORT_METHOD(getLeaderboardPlayers:(NSDictionary *)options
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
+
   @try{
-  //Get Player Ids
-  NSArray *playerIds=options[@"playerIds"];
-  //create Query with Player Ids
-  GKLeaderboard *query = [[GKLeaderboard alloc] initWithPlayers:[NSArray arrayWithObject:playerIds]];
+    //Get Player Ids
+    NSArray *playerIds=options[@"playerIds"];
+    //create Query with Player Ids
+    GKLeaderboard *query = [[GKLeaderboard alloc] initWithPlayers:[NSArray arrayWithObject:playerIds]];
 
-  if (query != nil){
-    [query loadScoresWithCompletionHandler: ^(NSArray *scores, NSError *error) {
-      if (error != nil)reject(@"Error", @"Error getting players leaderboards",error);
-      else  resolve(scores);
-    }];
-  }else{
-    reject(@"Error", @"Error creating Leaderboard query",nil);
+    if (query != nil){
+      [query loadScoresWithCompletionHandler: ^(NSArray *scores, NSError *error) {
+        if (error != nil)reject(@"Error", @"Error getting players leaderboards",error);
+        else  resolve(scores);
+      }];
+    }else{
+      reject(@"Error", @"Error creating Leaderboard query",nil);
+    }
+  }@catch (NSError * e) {
+    reject(@"Error",@"Error getting leaderboard players.", e);
   }
-}@catch (NSError * e) {
-  reject(@"Error",@"Error getting leaderboard players.", e);
 }
-}
-
-
-
-
-
-
 
 
 
 /*
  -----------------------------------------------------------------------------------------------------------------------------------------
  Achievements
-  -----------------------------------------------------------------------------------------------------------------------------------------
- */
-
+ -----------------------------------------------------------------------------------------------------------------------------------------
+*/
 
 /* --------------openAchievementModal--------------*/
 
@@ -496,17 +445,6 @@ RCT_EXPORT_METHOD(openAchievementModal: (NSDictionary *)options
                   rejecter:(RCTPromiseRejectBlock)reject){
 
   if(_isGameCenterAvailable==NO){
-    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-    UIAlertController *gameCenterIsUnavailablePopup = [UIAlertController
-                                                       alertControllerWithTitle:@"Game Center is unavailable!"
-                                                       message:@"You must be logged in to Game Center!"
-                                                       preferredStyle:UIAlertControllerStyleActionSheet];
-    [gameCenterIsUnavailablePopup addAction:[UIAlertAction actionWithTitle:@"Dismiss"
-                                                                     style:UIAlertActionStyleCancel
-                                                                   handler:^(UIAlertAction *action) {
-                                                                     [gameCenterIsUnavailablePopup dismissViewControllerAnimated:YES completion:nil];
-                                                                   }]];
-    [rnView presentViewController:gameCenterIsUnavailablePopup animated:YES completion:nil];
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
@@ -531,40 +469,33 @@ RCT_EXPORT_METHOD(openAchievementModal: (NSDictionary *)options
 };
 
 
-
-
-
 /* --------------getAchievements--------------*/
 
-  RCT_EXPORT_METHOD(getAchievements: (RCTPromiseResolveBlock)resolve
+RCT_EXPORT_METHOD(getAchievements: (RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
 
-    if(_isGameCenterAvailable==NO){
-
-      reject(@"Error",@"Game Center is Unavailable", nil);
-      return;
-    }
-
+  if(_isGameCenterAvailable==NO){
+    reject(@"Error",@"Game Center is Unavailable", nil);
+    return;
+  }
 
   NSMutableArray *earntAchievements = [NSMutableArray array];
-  [GKAchievement loadAchievementsWithCompletionHandler:^(NSArray *achievements, NSError *error)
-   {
-     if (error == nil){
-       for (GKAchievement* achievement in achievements)
-       {
-         NSMutableDictionary *entry = [NSMutableDictionary dictionary];
-         entry[@"identifier"] = achievement.identifier;
-         entry[@"percentComplete"] = [NSNumber numberWithDouble: achievement.percentComplete];
-         entry[@"completed"] = [NSNumber numberWithBool:achievement.completed];
-         entry[@"lastReportedDate"] = [NSNumber numberWithDouble:[achievement.lastReportedDate timeIntervalSince1970] * 1000];
-         entry[@"showsCompletionBanner"] = [NSNumber numberWithBool:achievement.showsCompletionBanner];
-//         entry[@"playerID"] = achievement.playerID;
-         [earntAchievements addObject:entry];
-       }
-       resolve(earntAchievements);
-     }else{
-        reject(@"Error", @"Error getting achievements",error);
-     }
+  [GKAchievement loadAchievementsWithCompletionHandler:^(NSArray *achievements, NSError *error){
+    if (error == nil) {
+      for (GKAchievement* achievement in achievements) {
+        NSMutableDictionary *entry = [NSMutableDictionary dictionary];
+        entry[@"identifier"] = achievement.identifier;
+        entry[@"percentComplete"] = [NSNumber numberWithDouble: achievement.percentComplete];
+        entry[@"completed"] = [NSNumber numberWithBool:achievement.completed];
+        entry[@"lastReportedDate"] = [NSNumber numberWithDouble:[achievement.lastReportedDate timeIntervalSince1970] * 1000];
+        entry[@"showsCompletionBanner"] = [NSNumber numberWithBool:achievement.showsCompletionBanner];
+        //  entry[@"playerID"] = achievement.playerID;
+        [earntAchievements addObject:entry];
+      }
+      resolve(earntAchievements);
+    }else{
+      reject(@"Error", @"Error getting achievements",error);
+    }
    }];
 }
 
@@ -575,34 +506,22 @@ RCT_EXPORT_METHOD(resetAchievements:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
   if(_isGameCenterAvailable==NO){
-    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-    UIAlertController *gameCenterIsUnavailablePopup = [UIAlertController
-                                                       alertControllerWithTitle:@"Game Center is unavailable!"
-                                                       message:@"You must be logged in to Game Center!"
-                                                       preferredStyle:UIAlertControllerStyleActionSheet];
-    [gameCenterIsUnavailablePopup addAction:[UIAlertAction actionWithTitle:@"Dismiss"
-                                                                     style:UIAlertActionStyleCancel
-                                                                   handler:^(UIAlertAction *action) {
-                                                                     [gameCenterIsUnavailablePopup dismissViewControllerAnimated:YES completion:nil];
-                                                                   }]];
-    [rnView presentViewController:gameCenterIsUnavailablePopup animated:YES completion:nil];
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
+
   // Clear all progress saved on Game Center.
   if(!options[@"hideAlert"]){
+    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+    UIAlertController * alert = [UIAlertController
+                                 alertControllerWithTitle:@"Reset Achievements?"
+                                 message:@"Are you sure you want to reset your achievements. This can not be undone."
+                                 preferredStyle:UIAlertControllerStyleAlert];
 
+    UIAlertController *yesAlert = [UIAlertController  alertControllerWithTitle:@"Success!"
+                                                      message:@"You successfully reset your achievements!"
+                                                      preferredStyle:UIAlertControllerStyleActionSheet];
 
-  UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-
-  UIAlertController * alert = [UIAlertController
-                               alertControllerWithTitle:@"Reset Achievements?"
-                               message:@"Are you sure you want to reset your achievements. This can not be undone."
-                               preferredStyle:UIAlertControllerStyleAlert];
-
-   UIAlertController *yesAlert = [UIAlertController alertControllerWithTitle:@"Success!"
-                                                       message:@"You successfully reset your achievements!"
-                                                       preferredStyle:UIAlertControllerStyleActionSheet];
   [yesAlert addAction:[UIAlertAction actionWithTitle:@"Cancel" style:UIAlertActionStyleCancel handler:^(UIAlertAction *action) {
     [yesAlert dismissViewControllerAnimated:YES completion:nil];
   }]];
@@ -614,172 +533,125 @@ RCT_EXPORT_METHOD(resetAchievements:(NSDictionary *)options
                               handler:^(UIAlertAction * action) {
                                 //Handle your yes please button action here
                                 [GKAchievement resetAchievementsWithCompletionHandler: ^ (NSError * error){
-                                  if(error != nil) {reject(@ "Error", @ "Error resetting achievements", error);}
+                                  if(error != nil) {
+                                    reject(@ "Error", @ "Error resetting achievements", error);}
                                   else {
-                                  [rnView presentViewController:yesAlert animated:YES completion:nil];
+                                    [rnView presentViewController:yesAlert animated:YES completion:nil];
                                     NSDictionary *json = @{
-                                                           @"message":@"User achievements not reset",
-                                                           @"resetAchievements":@true
-                                                           };
+                                      @"message":@"User achievements not reset",
+                                      @"resetAchievements":@true
+                                    };
                                     resolve(json);
-                                }
+                                  }
+                                }];
                               }];
-                                  }];
 
   UIAlertAction* noButton = [UIAlertAction
                              actionWithTitle:@"No!"
                              style:UIAlertActionStyleDefault
                              handler:^(UIAlertAction * action) {
-                               //Handle no, thanks button
-                               NSDictionary *json = @{
-                                                      @"message":@"User achievements not reset",
-                                                      @"resetAchievements":@false
-                                                    };
+                                //Handle no, thanks button
+                                NSDictionary *json = @{
+                                  @"message":@"User achievements not reset",
+                                  @"resetAchievements":@false
+                                };
                                 resolve(json);
                              }];
 
   [alert addAction:yesButton];
   [alert addAction:noButton];
 
-
-
-   [rnView presentViewController:alert animated:YES completion:nil];
+  [rnView presentViewController:alert animated:YES completion:nil];
 
   }else{
     NSDictionary *json = @{
-                           @"message":@"User achievements reset",
-                           @"resetAchievements":@true
-                           };
+      @"message":@"User achievements reset",
+      @"resetAchievements":@true
+    };
     resolve(json);
   }
 
 }
 
 
-
-
-
-
 /* --------------submitAchievement--------------*/
-
 
 RCT_EXPORT_METHOD(submitAchievementScore:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
-  if(_isGameCenterAvailable==NO){
-//    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-//    UIAlertController *gameCenterIsUnavailablePopup = [UIAlertController
-//                                                       alertControllerWithTitle:@"Game Center is unavailable!"
-//                                                       message:@"You must be logged in to Game Center!"
-//                                                       preferredStyle:UIAlertControllerStyleActionSheet];
-//    [gameCenterIsUnavailablePopup addAction:[UIAlertAction actionWithTitle:@"Dismiss"
-//                                                                     style:UIAlertActionStyleCancel
-//                                                                   handler:^(UIAlertAction *action) {
-//                                                                     [gameCenterIsUnavailablePopup dismissViewControllerAnimated:YES completion:nil];
-//                                                                   }]];
-//    [rnView presentViewController:gameCenterIsUnavailablePopup animated:YES completion:nil];
+  if(_isGameCenterAvailable==NO) {
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
   @try{
+    NSString *percent = options[@"percentComplete"];
 
+    float percentFloat = [percent floatValue];
+    NSString *achievementId;
+    if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
+    else achievementId=_achievementIdentifier;
 
-  NSString *percent = [options objectForKey:@"percentComplete"];
+    RCTLog(@"Will store: %@ (%f) on '%@'", percent, percentFloat, achievementId);
 
-     RCTLog(@"percent: %@",percent);
-  float percentFloat = [percent floatValue];
-    RCTLog(@"percentFloat: %f",percentFloat);
-  NSString *achievementId;
-  if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
-  else achievementId=_achievementIdentifier;
-//
     if(!achievementId)return reject(@"Error",@"No Game Center `achievementIdentifier` passed and no default set", nil);
-    return;
-  BOOL showsCompletionBanner=YES;
-  if(options[@"hideCompletionBanner"])showsCompletionBanner=NO;
+    BOOL showsCompletionBanner=YES;
+    if(options[@"hideCompletionBanner"])showsCompletionBanner=NO;
     NSLog(@"showsCompletionBanner %d",showsCompletionBanner);
-  GKAchievement *achievement = [[GKAchievement alloc] initWithIdentifier: achievementId];
-  if (achievement){
-    achievement.percentComplete = percentFloat;
-    achievement.showsCompletionBanner = showsCompletionBanner;
+    GKAchievement *achievement = [[GKAchievement alloc] initWithIdentifier: achievementId];
+    if (achievement){
+      achievement.percentComplete = percentFloat;
+      achievement.showsCompletionBanner = showsCompletionBanner;
 
-    NSArray *achievements = [NSArray arrayWithObjects:achievement, nil];
+      NSArray *achievements = [NSArray arrayWithObjects:achievement, nil];
 
-    [GKAchievement reportAchievements:achievements withCompletionHandler:^(NSError *error) {
-      if (error != nil){reject(@"Error",@"Game Center setting Achievement", error);}
-    else{
-        // Achievement notification banners are broken on iOS 7 so we do it manually here if 100%:
-        if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 &&
-            [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0 &&
-            floorf(percentFloat) >= 100)
-        {
-          [GKNotificationBanner showBannerWithTitle:@"Achievement" message:@"Completed!" completionHandler:^{}];
+      [GKAchievement reportAchievements:achievements withCompletionHandler:^(NSError *error) {
+        if (error != nil){
+          reject(@"Error",@"Game Center setting Achievement", error);
+        }else{
+          // Achievement notification banners are broken on iOS 7 so we do it manually here if 100%:
+          if ([[[UIDevice currentDevice] systemVersion] floatValue] >= 7.0 &&
+              [[[UIDevice currentDevice] systemVersion] floatValue] < 8.0 &&
+              floorf(percentFloat) >= 100)
+          {
+            [GKNotificationBanner showBannerWithTitle:@"Achievement" message:@"Completed!" completionHandler:^{}];
+          }
+          resolve(achievements);
         }
-
-
-      //RCTLog(@"achievements: %@",achievements);
-      NSLog(@"achievements: %@",achievements);
-      resolve(achievements);
-      }
-    }];
-  }
-  }
-  @catch (NSError * e) {
-      reject(@"Error",@"Error setting achievement.", e);
+      }];
     }
+  } @catch (NSError * e) {
+    reject(@"Error",@"Error setting achievement.", e);
   }
-
-
-
-
-
-
-
-
-
-
+}
 
 
 RCT_EXPORT_METHOD(invite:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
   if(_isGameCenterAvailable==NO){
-    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-    UIAlertController *gameCenterIsUnavailablePopup = [UIAlertController
-                                                       alertControllerWithTitle:@"Game Center is unavailable!"
-                                                       message:@"You must be logged in to Game Center!"
-                                                       preferredStyle:UIAlertControllerStyleActionSheet];
-    [gameCenterIsUnavailablePopup addAction:[UIAlertAction actionWithTitle:@"Dismiss"
-                                                                     style:UIAlertActionStyleCancel
-                                                                   handler:^(UIAlertAction *action) {
-                                                                     [gameCenterIsUnavailablePopup dismissViewControllerAnimated:YES completion:nil];
-                                                                   }]];
-    [rnView presentViewController:gameCenterIsUnavailablePopup animated:YES completion:nil];
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
 
-GKMatchRequest *request = [[GKMatchRequest alloc] init];
-request.minPlayers = 2;
-request.maxPlayers = 4;
-request.recipients =@[@"G:8135064222"];
-request.inviteMessage = @"Your Custom Invitation Message Here";
-request.recipientResponseHandler = ^(GKPlayer *player, GKInviteeResponse response)
-{
-  resolve(player);
-//  [self updateUIForPlayer: player accepted: (response == GKInviteeResponseAccepted)];
-};
+  GKMatchRequest *request = [[GKMatchRequest alloc] init];
+  request.minPlayers = 2;
+  request.maxPlayers = 4;
+  request.recipients =@[@"G:8135064222"];
+  request.inviteMessage = @"Your Custom Invitation Message Here";
+  request.recipientResponseHandler = ^(GKPlayer *player, GKInviteeResponse response) {
+    resolve(player);
+  };
 }
 
 RCT_EXPORT_METHOD(getPlayerFriends:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
-    resolve([GKLocalPlayer localPlayer].friends);
-//  [GKLocalPlayer loadPlayersForIdentifiers:players
-//                     withCompletionHandler:^(NSArray<GKPlayer *> * _Nullable players, NSError * _Nullable error) {
-//                       if(error)return reject(@"Error", @"Error reporting achievement",error);
-//                       resolve(players);
-//                     }];
+  if(_isGameCenterAvailable==NO){
+    reject(@"Error",@"Game Center is Unavailable", nil);
+    return;
+  }
+  resolve([GKLocalPlayer localPlayer].friends);
 }
+
 /*
 RCT_EXPORT_METHOD(challengeComposer:(int64_t) playerScore
                   options:(NSDictionary *)options
@@ -875,18 +747,7 @@ RCT_EXPORT_METHOD(challengeComposer:(int64_t) playerScore
 RCT_EXPORT_METHOD(challengePlayersToCompleteAchievement:(NSDictionary *)options
                   resolve:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject){
-  if(_isGameCenterAvailable==NO){
-    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-    UIAlertController *gameCenterIsUnavailablePopup = [UIAlertController
-                                                       alertControllerWithTitle:@"Game Center is unavailable!"
-                                                       message:@"You must be logged in to Game Center!"
-                                                       preferredStyle:UIAlertControllerStyleActionSheet];
-    [gameCenterIsUnavailablePopup addAction:[UIAlertAction actionWithTitle:@"Dismiss"
-                                                                     style:UIAlertActionStyleCancel
-                                                                   handler:^(UIAlertAction *action) {
-                                                                     [gameCenterIsUnavailablePopup dismissViewControllerAnimated:YES completion:nil];
-                                                                   }]];
-    [rnView presentViewController:gameCenterIsUnavailablePopup animated:YES completion:nil];
+  if(_isGameCenterAvailable==NO) {
     reject(@"Error",@"Game Center is Unavailable", nil);
     return;
   }
@@ -895,7 +756,6 @@ RCT_EXPORT_METHOD(challengePlayersToCompleteAchievement:(NSDictionary *)options
   [achievement selectChallengeablePlayers:[GKLocalPlayer localPlayer].friends withCompletionHandler:^(NSArray *challengeablePlayers, NSError *error) {
     if (challengeablePlayers){
       resolve(challengeablePlayers);
-//      [self presentChallengeWithPreselectedPlayers: challengeablePlayers];
     }
   }];
 }
@@ -1084,6 +944,77 @@ RCT_EXPORT_METHOD(challengePlayersToCompleteAchievement:(NSDictionary *)options
 //
 //  }];
 //}
+
+RCT_EXPORT_METHOD(loadSavedGameData:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  GKLocalPlayer *mobSvcAccount = [GKLocalPlayer localPlayer];
+
+  if(!mobSvcAccount.isAuthenticated){
+      reject(@"Error",@"Can't load game: Game center is not initalized...", nil);
+      return;
+  }
+
+  [mobSvcAccount fetchSavedGamesWithCompletionHandler:^(NSArray<GKSavedGame *> * _Nullable savedGames, NSError * _Nullable error) {
+
+    if(error != nil) {
+        NSLog(@"Failed to prepare saved game data: %@", error.description);
+        reject(@"Error",@"Can't load game", nil);
+    }
+
+    GKSavedGame *savedGameToLoad = nil;
+    for(GKSavedGame *savedGame in savedGames) {            NSLog(@"Successfully downloaded saved game data");
+      if([savedGame.name isEqualToString:options[@"name"]]) {
+        if (savedGameToLoad == nil || savedGameToLoad.modificationDate < savedGame.modificationDate) {
+            savedGameToLoad = savedGame;
+        }
+      }
+    }
+    if(savedGameToLoad == nil) {
+      resolve(@{
+        @"isConflict": @false,
+        @"data": @""
+      });
+      return;
+    }
+    [savedGameToLoad loadDataWithCompletionHandler:^(NSData * _Nullable data, NSError * _Nullable error) {
+      if(error == nil) {
+        MobSvcSavedGameData *savedGameData = [NSKeyedUnarchiver unarchiveObjectWithData:data];
+        NSLog(@"Successfully downloaded saved game data");
+        resolve(@{
+          @"isConflict": @false,
+          @"data": savedGameData.data
+        });
+      } else {
+        NSLog(@"Failed to download saved game data: %@", error.description);
+        reject(@"Error",@"Can't load game", nil);
+      }
+    }];
+  }];
+}
+
+
+RCT_EXPORT_METHOD(uploadSavedGameData:(NSDictionary *)options
+                  resolve:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject){
+  GKLocalPlayer *mobSvcAccount = [GKLocalPlayer localPlayer];
+
+  if(!mobSvcAccount.isAuthenticated) {
+    reject(@"Error",@"Can't save game: Game center is not initalized...", nil);
+    return;
+  }
+  MobSvcSavedGameData *savedGameData = [[MobSvcSavedGameData alloc] init];
+  savedGameData.data = options[@"data"];
+  [mobSvcAccount saveGameData:[NSKeyedArchiver archivedDataWithRootObject:savedGameData] withName:options[@"name"] completionHandler:^(GKSavedGame * _Nullable savedGame __unused, NSError * _Nullable error) {
+    if(error == nil) {
+      NSLog(@"Successfully uploaded saved game data");
+      resolve(@"Saved game data");
+    } else {
+      NSLog(@"Failed to upload saved game data: %@", error.description);
+      reject(@"Error",@"Can't save game", nil);
+    }
+  }];
+}
 
 
 
@@ -1311,6 +1242,44 @@ RCT_EXPORT_METHOD(challengePlayersToCompleteAchievement:(NSDictionary *)options
  }];
  ...
  }*/
+@end
+
+
+@implementation MobSvcSavedGameData
+
+#pragma mark MobSvcSavedGameData implementation
+
+static NSString * const sgDataKey = @"data";
+
++ (instancetype)sharedGameData {
+    static id sharedInstance = nil;
+
+    static dispatch_once_t onceToken;
+    dispatch_once(&onceToken, ^{
+        sharedInstance = [[self alloc] init];
+    });
+
+    return sharedInstance;
+}
+
+- (void)reset
+{
+    self.data = nil;
+}
+
+- (void)encodeWithCoder:(NSCoder *)encoder
+{
+    [encoder encodeObject:self.data forKey: sgDataKey];
+}
+
+- (nullable instancetype)initWithCoder:(nonnull NSCoder *)decoder {
+    self = [self init];
+    if (self) {
+        self.data = [decoder decodeObjectForKey:sgDataKey];
+    }
+    return self;
+}
+
 @end
 
 
