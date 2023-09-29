@@ -1,20 +1,55 @@
-
 {
   "name": "react-native-game-center",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "version": "1.2.3",
+  "description": "Apple's Game Center integration with React Native",
+  "main": "RNGameCenter/index.js",
+  "directories": {
+    "lib": "lib"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "commit": "git-cz",
+    "test": "jest",
+    "semantic-release": "semantic-release pre && npm publish && semantic-release post"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/garrettmac/react-native-game-center.git"
   },
   "keywords": [
-    "react-native"
+    "react",
+    "react-native",
+    "react-native-component",
+    "game-center",
+    "game",
+    "center",
+    "native-module",
+    "ios",
+    "apple",
+    "gamecenter"
   ],
-  "author": "",
-  "license": "",
-  "peerDependencies": {
-    "react-native": "^0.41.2",
-    "react-native-windows": "0.41.0-rc.1"
+
+  "author": "garrettmac <garrett@vyga.io> (http://vyga.io)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/garrettmac/react-native-game-center/issues"
+  },
+  "config": {
+    "commitizen": {
+      "path": "node_modules/cz-conventional-changelog"
+    }
+  },
+  "homepage": "https://github.com/garrettmac/react-native-game-center#readme",
+  "devDependencies": {
+    "commitizen": "^2.9.6",
+    "cz-conventional-changelog": "^2.0.0",
+    "semantic-release": "^8.0.3",
+    "react-native": "0.45.1",
+    "react": "16.0.0-alpha.12",
+    "jest": "20.0.4",
+    "react-test-renderer": "^16.0.0-alpha.12"
+  },
+  "jest": {
+    "preset": "react-native"
 
   }
 }
