@@ -46,8 +46,10 @@ npm i react-native -g
 react-native init myApp
 cd myApp
 yarn add react-native-game-center
-react-native link
-react-native run-ios
+cd ios
+pod install
+cd ..
+yarn ios
 ```
 
 # Basic Usage
@@ -66,8 +68,10 @@ RNGameCenter.getPlayer().then(player=>console.log("player: ",player))
 
 ```bash
 yarn add react-native-game-center
-react-native link
-react-native run-ios
+cd ios
+pod install
+cd ..
+yarn ios
 ```
 then **Follow setup Instructions**
 
