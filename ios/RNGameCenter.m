@@ -411,9 +411,9 @@ RCT_EXPORT_METHOD(openAchievementModal: (NSDictionary *)options
   }
 
   @try {
-      GKGameCenterViewController *gcViewController = [[GKGameCenterViewController alloc] init];
-      UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
-      gcViewController.viewState = GKGameCenterViewControllerStateAchievements;
+    GKGameCenterViewController *gcViewController = [[GKGameCenterViewController alloc] init];
+    UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
+    gcViewController.viewState = GKGameCenterViewControllerStateAchievements;
     //attaches to class to allow dismissal
     gcViewController.gameCenterDelegate = self;
     [rnView presentViewController:gcViewController animated:YES completion:nil];
