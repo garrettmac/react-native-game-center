@@ -411,14 +411,9 @@ RCT_EXPORT_METHOD(openAchievementModal: (NSDictionary *)options
   }
 
   @try {
-    GKGameCenterViewController* gcViewController = [[GKGameCenterViewController alloc]init];
+    GKGameCenterViewController *gcViewController = [[GKGameCenterViewController alloc] init];
     UIViewController *rnView = [UIApplication sharedApplication].keyWindow.rootViewController;
     gcViewController.viewState = GKGameCenterViewControllerStateAchievements;
-    // Get achievementIdentifier or use default achievementIdentifier
-    NSString *achievementId;
-    if(options[@"achievementIdentifier"])achievementId=options[@"achievementIdentifier"];
-    else achievementId=_achievementIdentifier;
-    gcViewController.leaderboardIdentifier = achievementId;
     //attaches to class to allow dismissal
     gcViewController.gameCenterDelegate = self;
     [rnView presentViewController:gcViewController animated:YES completion:nil];

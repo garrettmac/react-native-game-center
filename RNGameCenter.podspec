@@ -1,6 +1,6 @@
 require 'json'
 
-package = JSON.parse(File.read('../../package.json'))
+package = JSON.parse(File.read('package.json'))
 
 Pod::Spec.new do |s|
   s.name                = 'RNGameCenter'
@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
   s.author              = package['author']
   s.source              = { :git => "https://github.com/garrettmac/RNGameCenter.git" }
   s.platform            = :ios, "7.0"
-  s.source_files        = "*.{h,m}"
+  s.source_files        = "ios/*.{h,m}"
   s.requires_arc        = true
-  s.dependency 'React'
+  s.dependency 'React-Core'
 end
