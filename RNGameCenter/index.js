@@ -1,7 +1,14 @@
 import { NativeModules } from 'react-native';
 
 // const { RNGameCenter as ReactNativeGameCenter } = NativeModules;
-
+//standardizes the way options are validated
+const validateOptions = (options, requiredFields) => {
+  requiredFields.forEach(field => {
+    if (!options[field]) {
+      throw new Error(`Missing '${field}' from options object`);
+    }
+  });
+};
 const RNGameCenter = {
   init:(options)=> {
     // required: achievementIdentifier
@@ -41,11 +48,10 @@ const RNGameCenter = {
     //leaderboardIdentifier or Defaults back to init leaderboardIdentifier
     return NativeModules.RNGameCenter.openLeaderboardModal(options)
   },
-  submitLeaderboardScore:(options)=>{
-    //optional: leaderboardIdentifier or Defaults back to init leaderboardIdentifier
-    //required: score
-    if(!options.score) throw "Missing 'score' from submitLeaderboardScore object";
-    else return NativeModules.RNGameCenter.submitLeaderboardScore(options.score,options)
+  submitLeaderboardScore: (options) => {
+    validateOptions(options, ['score']);
+// error message included in abstraction for validation handling
+    return NativeModules.RNGameCenter.submitLeaderboardScore(options.score, options);
   },
 
   // getLeaderboardPlayers:(options)=>{
@@ -77,7 +83,7 @@ const RNGameCenter = {
     // achievementIdentifier (optional, reverts to default)
     //required
     // percentComplete (number/float 1-100)
-    if(!options.percentComplete) throw "Missing 'percentComplete' from submitAchievementScore object";
+    validateOptions(options, ['percentComplete']);
     // if(!options.showsCompletionBanner)
     return NativeModules.RNGameCenter.submitAchievementScore(options)
     // return  NativeModules.RNGameCenter.submitAchievementScore(options.percentComplete,options)
