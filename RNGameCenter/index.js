@@ -10,28 +10,49 @@ const validateOptions = (options, requiredFields) => {
   });
 };
 const RNGameCenter = {
-  init:(options)=> {
-    // required: achievementIdentifier
-    // optional: leaderboardIdentifier
-    // {achievementIdentifier:""
-    // leaderboardIdentifier:""}
-    return  NativeModules.RNGameCenter.init(options)
+  init: async (options) => {
+    try {
+      return await NativeModules.RNGameCenter.init(options);
+    } catch (error) {
+      console.error('Error initializing Game Center:', error);
+      throw error;
+    }
   },
 
-  userLogged:()=>{
-    return NativeModules.RNGameCenter.userLogged()
+  userLogged:async () => {
+    try {
+      return await NativeModules.RNGameCenter.userLogged();
+    } catch (error) {
+      console.error('Error checking user logged status:', error);
+      throw error;
+    }
   },
 
-  getPlayer:()=>{
-    return NativeModules.RNGameCenter.getPlayer()
+  getPlayer:async () => {
+    try {
+      return await NativeModules.RNGameCenter.getPlayer();
+    } catch (error) {
+      console.error('Error getting player:', error);
+      throw error;
+    }
   },
 
-  getPlayerFriends:()=>{
-    return NativeModules.RNGameCenter.getPlayerFriends()
+  getPlayerFriends:async () => {
+    try {
+      return await NativeModules.RNGameCenter.getPlayerFriends();
+    } catch (error) {
+      console.error('Error getting player friends:', error);
+      throw error;
+    }
   },
 
-  getPlayerImage:()=>{
-    return NativeModules.RNGameCenter.getPlayerImage()
+  getPlayerImage:async () => {
+    try {
+      return await NativeModules.RNGameCenter.getPlayerImage();
+    } catch (error) {
+      console.error('Error getting player image:', error);
+      throw error;
+    }
   },
 
   // challengeWithScore:(options)=>{
@@ -43,15 +64,22 @@ const RNGameCenter = {
   // },
 
   // https://developer.apple.com/documentation/gamekit/gkscore
-  openLeaderboardModal:(options)=>{
-    //props
-    //leaderboardIdentifier or Defaults back to init leaderboardIdentifier
-    return NativeModules.RNGameCenter.openLeaderboardModal(options)
+  openLeaderboardModal:async (options) => {
+    try {
+      return await NativeModules.RNGameCenter.openLeaderboardModal(options);
+    } catch (error) {
+      console.error('Error opening leaderboard modal:', error);
+      throw error;
+    }
   },
-  submitLeaderboardScore: (options) => {
-    validateOptions(options, ['score']);
-// error message included in abstraction for validation handling
-    return NativeModules.RNGameCenter.submitLeaderboardScore(options.score, options);
+  submitLeaderboardScore: async (options) => {
+    try {
+      validateOptions(options, ['score']);
+      return await NativeModules.RNGameCenter.submitLeaderboardScore(options.score, options);
+    } catch (error) {
+      console.error('Error submitting leaderboard score:', error);
+      throw error;
+    }
   },
 
   // getLeaderboardPlayers:(options)=>{
@@ -63,40 +91,62 @@ const RNGameCenter = {
   // },
 
   // https://developer.apple.com/documentation/gamekit/gkachievement
-  openAchievementModal:(options={})=>{
-    return NativeModules.RNGameCenter.openAchievementModal(options)
+  openAchievementModal:async (options = {}) => {
+    try {
+      return await NativeModules.RNGameCenter.openAchievementModal(options);
+    } catch (error) {
+      console.error('Error opening achievement modal:', error);
+      throw error;
+    }
   },
 
-  getAchievements:()=>{
-    return NativeModules.RNGameCenter.getAchievements()
+  getAchievements:async () => {
+    try {
+      return await NativeModules.RNGameCenter.getAchievements();
+    } catch (error) {
+      console.error('Error getting achievements:', error);
+      throw error;
+    }
   },
 
-  resetAchievements:(options={})=>{
-    return NativeModules.RNGameCenter.resetAchievements(options)
+  resetAchievements:async (options = {}) => {
+    try {
+      return await NativeModules.RNGameCenter.resetAchievements(options);
+    } catch (error) {
+      console.error('Error resetting achievements:', error);
+      throw error;
+    }
   },
 
   // entry[@"playerID"] = achievement.playerID;
   // [earntAchievements addObject:entry];
-  submitAchievementScore:(options)=>{
-    //optional
-    //showsCompletionBanner (boolean)
-    // achievementIdentifier (optional, reverts to default)
-    //required
-    // percentComplete (number/float 1-100)
-    validateOptions(options, ['percentComplete']);
-    // if(!options.showsCompletionBanner)
-    return NativeModules.RNGameCenter.submitAchievementScore(options)
-    // return  NativeModules.RNGameCenter.submitAchievementScore(options.percentComplete,options)
+  submitAchievementScore:async (options) => {
+    try {
+      validateOptions(options, ['percentComplete']);
+      return await NativeModules.RNGameCenter.submitAchievementScore(options);
+    } catch (error) {
+      console.error('Error submitting achievement score:', error);
+      throw error;
+    }
   },
 
-  uploadSavedGameData:(options)=> {
-    return NativeModules.RNGameCenter.uploadSavedGameData(options);
+  uploadSavedGameData:async (options) => {
+    try {
+      return await NativeModules.RNGameCenter.uploadSavedGameData(options);
+    } catch (error) {
+      console.error('Error uploading saved game data:', error);
+      throw error;
+    }
   },
 
-  loadSavedGameData:(options)=> {
-    return NativeModules.RNGameCenter.loadSavedGameData(options);
+  loadSavedGameData: async (options) => {
+    try {
+      return await NativeModules.RNGameCenter.loadSavedGameData(options);
+    } catch (error) {
+      console.error('Error loading saved game data:', error);
+      throw error;
+    }
   },
-
 };
 
 
